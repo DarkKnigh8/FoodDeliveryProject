@@ -1,4 +1,4 @@
-// imports...
+
 import { useEffect, useState } from 'react';
 import MenuManager from '../components/MenuManager';
 import { restaurantAPI } from '../services/api';

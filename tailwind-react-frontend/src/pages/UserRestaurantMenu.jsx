@@ -25,7 +25,7 @@ export default function UserRestaurantMenu() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link to="/" className="text-blue-600 hover:underline mb-4 inline-block">← Back to Restaurants</Link>
+      <Link to="/home" className="text-blue-600 hover:underline mb-4 inline-block">← Back to Restaurants</Link>
 
       <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
       <p className="text-sm text-gray-500 mb-4">📍 {restaurant.location || 'N/A'}</p>

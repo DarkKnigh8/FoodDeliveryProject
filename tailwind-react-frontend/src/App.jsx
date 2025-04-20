@@ -5,6 +5,7 @@ import UserRestaurantMenu from './pages/UserRestaurantMenu';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Landing from './pages/Landing';
+import AdminDashbord from './pages/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -25,6 +26,7 @@ function App() {
         />
         <Route path="/restaurantDashboard" element={<RestaurantDashboard />} />
         <Route path="/restaurants/:id" element={<UserRestaurantMenu />} />
+        <Route path="/adminDashboard" element={<AdminDashbord />} />
         
         
       </Routes>
