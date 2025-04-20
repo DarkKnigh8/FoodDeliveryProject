@@ -1,10 +1,14 @@
-const express = require("express");
-const { createOrder, getOrders } = require("../controllers/orderController");
-const authMiddleware = require("../middleware/authMiddleware");
+// src/routes/orderRoutes.js
 
+const express = require('express');
 const router = express.Router();
+const { placeOrder, getMyOrders, updateOrderStatus } = require('../controllers/orderController');
+const { authenticate } = require('../middleware/authMiddleware');
 
-router.post("/", authMiddleware, createOrder); // Requires authentication
-router.get("/", getOrders); // Public
+router.use(authenticate);
+
+router.post('/', placeOrder);
+router.get('/my-orders', getMyOrders);
+router.put('/:orderId/status', updateOrderStatus);
 
 module.exports = router;

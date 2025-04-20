@@ -1,35 +1,62 @@
-const Order = require("../models/Order");
+const Order = require('../models/Order');
 
-exports.createOrder = async (req, res) => {
+// Place a new order
+exports.placeOrder = async (req, res) => {
   try {
-    const newOrder = new Order(req.body);
-    await newOrder.save();
-    res.status(201).json(newOrder);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-  console.log("Incoming order payload:", req.body);
+    const { restaurantId, items, totalPrice } = req.body;
 
-};
-exports.createOrder = async (req, res, next) => {
-  console.log("✅ Incoming POST /api/orders");
-  console.log("Payload:", req.body);
-  try {
-    const order = new Order(req.body);
-    const saved = await order.save();
+    console.log("Incoming order request:");
+    console.log("User:", req.user);
+    console.log("Restaurant ID:", restaurantId);
+    console.log("Items:", items);
+    console.log("Total Price:", totalPrice);
+
+    if (!req.user || !req.user.id) {
+      return res.status(400).json({ error: 'User authentication failed' });
+    }
+
+    if (!restaurantId || !Array.isArray(items) || items.length === 0 || !totalPrice) {
+      return res.status(400).json({ error: 'Missing required order fields' });
+    }
+
+    const newOrder = new Order({
+      customerId: req.user.id,
+      restaurantId,
+      items,
+      totalPrice,
+    });
+
+    const saved = await newOrder.save();
     res.status(201).json(saved);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    console.error("Order placement error:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
-
-exports.getOrders = async (req, res) => {
+// Get all orders for the logged-in customer
+exports.getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find();
-    res.status(200).json(orders);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const orders = await Order.find({ customerId: req.user.id }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
+// Update order status by ID
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const updated = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Order not found' });
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Error updating order status:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
