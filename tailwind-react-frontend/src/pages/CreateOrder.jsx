@@ -1,94 +1,99 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { placeOrder } from '../services/api';
+import MenuCard from '../components/MenuCard';
+import { mockMenu } from '../mock/mockMenu';
+
+
 
 export default function CreateOrder() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const menu = state?.menu || [];
+  const restaurantId = state?.restaurantId;
+//   const menu = mockMenu;
 
-  const initialItem = state?.item
-    ? [{ name: state.item.name, quantity: 1, price: state.item.price }]
-    : [{ name: '', quantity: 1, price: 0 }];
-
-  const [items, setItems] = useState(initialItem);
-  const [restaurantId, setRestaurantId] = useState(state?.item?.restaurantId || '');
+  const [quantities, setQuantities] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const totalPrice = items.reduce((sum, i) => sum + i.quantity * i.price, 0);
-    const order = { restaurantId, items, totalPrice };
+  const handleQuantityChange = (item, qty) => {
+    setQuantities((prev) => ({ ...prev, [item.name]: qty }));
+  };
 
-    try {
-      setLoading(true);
-      const res = await placeOrder(order);
-      setLoading(false);
+  const selectedItems = menu
+    .filter((item) => quantities[item.name] > 0)
+    .map((item) => ({
+      name: item.name,
+      price: item.price,
+      quantity: quantities[item.name],
+    }));
 
-      if (res._id) {
-        alert('✅ Order placed successfully!');
-        navigate('/orders');
-      } else {
-        alert('❌ Failed to place order: ' + (res.error || 'Unknown error'));
-      }
-    } catch (err) {
-      setLoading(false);
-      alert('❌ Error placing order: ' + err.message);
+  const total = selectedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  const handleOrder = async () => {
+    setLoading(true);
+    const res = await placeOrder({ restaurantId, items: selectedItems, totalPrice: total });
+    setLoading(false);
+    if (res._id) {
+      navigate('/orders');
+    } else {
+      alert('Failed to place order');
     }
   };
 
-  const updateItem = (index, key, value) => {
-    const copy = [...items];
-    copy[index][key] = key === 'quantity' || key === 'price' ? Number(value) : value;
-    setItems(copy);
-  };
-
   return (
-    <div className="max-w-xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Create Order</h1>
-      <input
-        className="border p-2 w-full mb-2"
-        placeholder="Restaurant ID"
-        value={restaurantId}
-        onChange={(e) => setRestaurantId(e.target.value)}
-      />
+    <div className="max-w-7xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Choose Your Items</h1>
 
-      {items.map((item, i) => (
-        <div key={i} className="flex gap-2 mb-2">
-          <input
-            className="border p-2 flex-1"
-            placeholder="Item Name"
-            value={item.name}
-            onChange={(e) => updateItem(i, 'name', e.target.value)}
-          />
-          <input
-            className="border p-2 w-16"
-            type="number"
-            value={item.quantity}
-            onChange={(e) => updateItem(i, 'quantity', e.target.value)}
-          />
-          <input
-            className="border p-2 w-24"
-            type="number"
-            value={item.price}
-            onChange={(e) => updateItem(i, 'price', e.target.value)}
-          />
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-3">Featured</h2>
+        <div className="flex overflow-x-auto space-x-4 pb-2">
+          {menu.slice(0, 8).map((item, idx) => (
+            <MenuCard
+              key={idx}
+              item={item}
+              quantity={quantities[item.name] || 0}
+              onChange={handleQuantityChange}
+            />
+          ))}
         </div>
-      ))}
+      </div>
 
-      <button
-        className="bg-blue-600 text-white px-4 py-2 rounded mt-2"
-        onClick={() => setItems([...items, { name: '', quantity: 1, price: 0 }])}
-      >
-        + Add Item
-      </button>
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-3">Menu</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {menu.map((item, idx) => (
+            <MenuCard
+              key={idx}
+              item={item}
+              quantity={quantities[item.name] || 0}
+              onChange={handleQuantityChange}
+            />
+          ))}
+        </div>
+      </div>
 
-      <button
-        className="bg-green-600 text-white px-4 py-2 rounded mt-2 ml-2"
-        onClick={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? 'Placing Order...' : 'Place Order'}
-      </button>
+      {selectedItems.length > 0 && (
+        <div className="mt-10 p-6 border rounded shadow bg-white max-w-xl mx-auto">
+          <h2 className="text-xl font-semibold mb-2">Order Summary</h2>
+          <ul className="mb-3 text-sm">
+            {selectedItems.map((item, idx) => (
+              <li key={idx} className="flex justify-between">
+                <span>{item.name} × {item.quantity}</span>
+                <span>LKR {item.quantity * item.price}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-right font-bold">Total: LKR {total}</p>
+          <button
+            onClick={handleOrder}
+            disabled={loading}
+            className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+          >
+            {loading ? 'Placing order...' : 'Confirm and Place Order'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -60,3 +60,69 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.getOrderTracking = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json({ status: order.status, location: order.currentLocation });
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching tracking data' });
+  }
+};
+
+exports.updateOrderLocation = async (req, res) => {
+  try {
+    const { lat, lng } = req.body;
+    const order = await Order.findByIdAndUpdate(
+      req.params.orderId,
+      { currentLocation: { lat, lng } },
+      { new: true }
+    );
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating location' });
+  }
+};
+
+// Secure: Get orders for a specific restaurant (restaurant owner only)
+exports.getOrdersByRestaurant = async (req, res) => {
+  const { restaurantId } = req.params;
+
+  try {
+    // Ensure user has the 'restaurant' role
+    if (req.user.role !== 'restaurant') {
+      return res.status(403).json({ message: 'Forbidden: Not a restaurant owner' });
+    }
+
+    // Only fetch orders where restaurantId matches AND userId matches the token
+    const orders = await Order.find({ restaurantId, ownerId: req.user.id }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch restaurant orders' });
+  }
+};
+
+// // Secure: Update status of an order (restaurant owner only)
+// exports.updateOrderStatus = async (req, res) => {
+//   const { orderId } = req.params;
+//   const { status } = req.body;
+
+//   try {
+//     const order = await Order.findById(orderId);
+
+//     if (!order) return res.status(404).json({ message: 'Order not found' });
+
+//     // Only allow update if the user owns the restaurant
+//     if (req.user.role !== 'restaurant' || req.user.id !== order.ownerId) {
+//       return res.status(403).json({ message: 'Forbidden: You cannot modify this order' });
+//     }
+
+//     order.status = status;
+//     await order.save();
+
+//     res.json(order);
+//   } catch (err) {
+//     res.status(500).json({ message: 'Failed to update order status' });
+//   }
+// };

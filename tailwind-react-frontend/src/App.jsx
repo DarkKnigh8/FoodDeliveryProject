@@ -10,8 +10,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
-
-import Navigation from './components/Navigation'; // new component (see below)
+import TrackOrder from './pages/TrackOrder'; // ✅ newly added
+import Navigation from './components/Navigation';
 
 function App() {
   return (
@@ -49,6 +49,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['customer']}>
                 <MyOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/track/:orderId"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <TrackOrder />
               </ProtectedRoute>
             }
           />

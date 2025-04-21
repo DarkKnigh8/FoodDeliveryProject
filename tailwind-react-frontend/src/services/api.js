@@ -12,7 +12,6 @@ const getAuthHeaders = () => {
 export const restaurantAPI = axios.create({
   baseURL: 'http://localhost:5000/api',
 });
-
 restaurantAPI.interceptors.request.use((config) => {
   config.headers = { ...config.headers, ...getAuthHeaders() };
   return config;
@@ -26,12 +25,11 @@ export const authAPI = axios.create({
 });
 
 // --------------------
-// ORDER SERVICE (port 5002)
+// ORDER SERVICE (port 5005)
 // --------------------
 const orderAPI = axios.create({
   baseURL: 'http://localhost:5005/api/orders',
 });
-
 orderAPI.interceptors.request.use((config) => {
   config.headers = { ...config.headers, ...getAuthHeaders() };
   return config;
@@ -49,8 +47,15 @@ export const fetchMyOrders = async () => {
   return res.data;
 };
 
-// Update order status by ID
+// Update order status using fetch() on port 5005
 export const updateOrderStatus = async (orderId, status) => {
-  const res = await orderAPI.put(`/${orderId}/status`, { status });
-  return res.data;
+  const res = await fetch(`http://localhost:5005/api/orders/${orderId}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+  return res.json();
 };
