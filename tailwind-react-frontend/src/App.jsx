@@ -27,6 +27,7 @@ function App() {
         <Route path="/restaurantDashboard" element={<RestaurantDashboard />} />
         <Route path="/restaurants/:id" element={<UserRestaurantMenu />} />
         <Route path="/adminDashboard" element={<AdminDashbord />} />
+
         
         
       </Routes>
