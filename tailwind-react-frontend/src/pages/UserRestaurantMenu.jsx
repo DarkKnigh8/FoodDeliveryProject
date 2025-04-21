@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { restaurantAPI } from '../services/api';
 
 export default function UserRestaurantMenu() {
   const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     restaurantAPI.get('/restaurants')
@@ -15,10 +16,8 @@ export default function UserRestaurantMenu() {
       .catch(err => console.error(err));
   }, [id]);
 
-  const handleAddToCart = (item) => {
-    const existingCart = JSON.parse(localStorage.getItem('cart')) || [];
-    localStorage.setItem('cart', JSON.stringify([...existingCart, { ...item, restaurantId: id }]));
-    alert(`✅ "${item.name}" added to cart`);
+  const handleOrder = (item) => {
+    navigate('/createorder', { state: { item: { ...item, restaurantId: id } } });
   };
 
   if (!restaurant) return <p className="text-center mt-8">Loading menu...</p>;
@@ -42,7 +41,6 @@ export default function UserRestaurantMenu() {
               </div>
               <p className="text-sm text-gray-600">{item.description}</p>
 
-              {/* ✅ Show image if available */}
               {item.image && (
                 <img
                   src={item.image}
@@ -56,12 +54,15 @@ export default function UserRestaurantMenu() {
               </p>
 
               <button
-                onClick={() => handleAddToCart(item)}
-                disabled={!item.available}
-                className={`mt-2 px-4 py-2 rounded text-white ${item.available ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+               onClick={() => navigate('/createorder', { state: { item: { ...item, restaurantId: id } } })}
+              disabled={!item.available}
+              className={`mt-2 px-4 py-2 rounded text-white ${
+              item.available ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
+              }`}
               >
-                Add to Cart
+                order
               </button>
+
             </li>
           ))}
         </ul>
