@@ -19,7 +19,7 @@ export default function UserRestaurantMenu() {
 
   const handleStartOrder = () => {
     navigate('/createorder', {
-      state: { menu: restaurant.menu, restaurantId: restaurant._id },
+      state: { menu: restaurant.menu, restaurantId: restaurant._id, name: restaurant.name, location: restaurant.location },
     });
   };
 

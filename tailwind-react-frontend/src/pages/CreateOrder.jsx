@@ -2,16 +2,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { placeOrder } from '../services/api';
 import MenuCard from '../components/MenuCard';
-import { mockMenu } from '../mock/mockMenu';
-
-
 
 export default function CreateOrder() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const menu = state?.menu || [];
   const restaurantId = state?.restaurantId;
-//   const menu = mockMenu;
+  const restaurantName = state?.name;
+  const restaurantLocation = state?.location;
 
   const [quantities, setQuantities] = useState({});
   const [loading, setLoading] = useState(false);
@@ -34,49 +32,45 @@ export default function CreateOrder() {
     setLoading(true);
     const res = await placeOrder({ restaurantId, items: selectedItems, totalPrice: total });
     setLoading(false);
+
     if (res._id) {
       navigate('/orders');
     } else {
-      alert('Failed to place order');
+      alert('❌ Failed to place order: ' + (res.error || 'Unknown error'));
     }
   };
 
+  if (!restaurantId || menu.length === 0) {
+    return <p className="text-center mt-10 text-red-600">Menu not loaded.</p>;
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Choose Your Items</h1>
-
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-3">Featured</h2>
-        <div className="flex overflow-x-auto space-x-4 pb-2">
-          {menu.slice(0, 8).map((item, idx) => (
-            <MenuCard
-              key={idx}
-              item={item}
-              quantity={quantities[item.name] || 0}
-              onChange={handleQuantityChange}
-            />
-          ))}
-        </div>
+      {/* 🏪 Restaurant Info Card */}
+      <div className="bg-white p-4 rounded shadow mb-6">
+        <h2 className="text-2xl font-bold">{restaurantName}</h2>
+        <p className="text-gray-500 mb-1">📍 {restaurantLocation}</p>
+        <p className="text-sm text-green-600">🕓 Estimated Time: 25-35 mins</p>
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-3">Menu</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {menu.map((item, idx) => (
-            <MenuCard
-              key={idx}
-              item={item}
-              quantity={quantities[item.name] || 0}
-              onChange={handleQuantityChange}
-            />
-          ))}
-        </div>
+      {/* 🍕 Menu Section */}
+      <h2 className="text-xl font-semibold mb-3">Menu</h2>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        {menu.map((item, idx) => (
+          <MenuCard
+            key={idx}
+            item={item}
+            quantity={quantities[item.name] || 0}
+            onChange={handleQuantityChange}
+          />
+        ))}
       </div>
 
+      {/* 🛒 Live Selection List */}
       {selectedItems.length > 0 && (
-        <div className="mt-10 p-6 border rounded shadow bg-white max-w-xl mx-auto">
-          <h2 className="text-xl font-semibold mb-2">Order Summary</h2>
-          <ul className="mb-3 text-sm">
+        <div className="mb-10">
+          <h2 className="text-xl font-semibold mb-2">Selected Items</h2>
+          <ul className="text-sm border p-4 rounded shadow bg-white mb-4 space-y-2">
             {selectedItems.map((item, idx) => (
               <li key={idx} className="flex justify-between">
                 <span>{item.name} × {item.quantity}</span>
@@ -84,11 +78,15 @@ export default function CreateOrder() {
               </li>
             ))}
           </ul>
-          <p className="text-right font-bold">Total: LKR {total}</p>
+
+          <div className="text-right text-lg font-bold text-blue-700 mb-4">
+            Total: LKR {total}
+          </div>
+
           <button
             onClick={handleOrder}
             disabled={loading}
-            className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded text-base"
           >
             {loading ? 'Placing order...' : 'Confirm and Place Order'}
           </button>

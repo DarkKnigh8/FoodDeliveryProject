@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react';
-import { fetchMyOrders, updateOrderStatus } from '../services/api';
+import { fetchMyOrders, updateOrderStatus, deleteOrder } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import EditOrderModal from '../components/EditOrderModal'; // Ensure correct path
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingOrder, setEditingOrder] = useState(null);
   const navigate = useNavigate();
 
   const loadOrders = async () => {
     setLoading(true);
     const data = await fetchMyOrders();
-    setOrders(Array.isArray(data) ? data : []);
+
+    const sorted = Array.isArray(data)
+      ? data
+          .filter(order => order.createdAt)
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      : [];
+
+    setOrders(sorted);
     setLoading(false);
   };
 
@@ -26,14 +35,33 @@ export default function MyOrders() {
     loadOrders();
   };
 
+  const handleDelete = async (orderId) => {
+    const confirmed = window.confirm('Are you sure you want to delete this order?');
+    if (!confirmed) return;
+
+    await deleteOrder(orderId);
+    loadOrders();
+  };
+
   const handleTrack = (orderId) => {
-    // For now, just redirect to dummy track page or log
     navigate(`/track/${orderId}`);
+  };
+
+  const handleSetDelivery = (orderId) => {
+    alert(`Set delivery for order ${orderId}`);
   };
 
   return (
     <div className="max-w-5xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">My Orders</h1>
+
+      {editingOrder && (
+        <EditOrderModal
+          order={editingOrder}
+          onClose={() => setEditingOrder(null)}
+          onUpdated={loadOrders}
+        />
+      )}
 
       {loading ? (
         <p>Loading...</p>
@@ -47,6 +75,10 @@ export default function MyOrders() {
               <span className={`text-sm font-medium ${order.status === 'Cancelled' ? 'text-red-600' : 'text-green-600'}`}>
                 {order.status}
               </span>
+            </div>
+
+            <div className="text-sm text-gray-500 mb-2">
+              Placed on: {new Date(order.createdAt).toLocaleString()}
             </div>
 
             <ul className="text-sm space-y-1 mb-2">
@@ -63,7 +95,7 @@ export default function MyOrders() {
             </div>
 
             {/* Action buttons */}
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-4 mt-4 flex-wrap">
               {order.status === 'Pending' && (
                 <button
                   onClick={() => handleCancel(order._id)}
@@ -81,6 +113,31 @@ export default function MyOrders() {
                   Track Order
                 </button>
               )}
+
+              {(order.status === 'Pending' || order.status === 'Confirmed') && (
+                <button
+                  onClick={() => handleSetDelivery(order._id)}
+                  className="px-4 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded"
+                >
+                  Set Delivery
+                </button>
+              )}
+
+              {/* ✅ Edit Order Button */}
+              <button
+                onClick={() => setEditingOrder(order)}
+                className="px-4 py-1 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded"
+              >
+                Edit Order
+              </button>
+
+              {/* ✅ Delete Order Button */}
+              <button
+                onClick={() => handleDelete(order._id)}
+                className="px-4 py-1 text-sm bg-gray-600 hover:bg-gray-700 text-white rounded"
+              >
+                Delete Order
+              </button>
             </div>
           </div>
         ))

@@ -59,3 +59,25 @@ export const updateOrderStatus = async (orderId, status) => {
   });
   return res.json();
 };
+
+export const deleteOrder = async (orderId) => {
+  const res = await fetch(`http://localhost:5005/api/orders/${orderId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  return res.json();
+};
+
+export const editOrder = async (orderId, updatedData) => {
+  const res = await fetch(`http://localhost:5005/api/orders/${orderId}/edit`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify(updatedData),
+  });
+  return res.json();
+};
