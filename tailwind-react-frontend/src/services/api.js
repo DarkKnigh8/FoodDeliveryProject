@@ -54,3 +54,33 @@ export const updateOrderStatus = async (orderId, status) => {
   const res = await orderAPI.put(`/${orderId}/status`, { status });
   return res.data;
 };
+
+
+
+
+//  admin_service
+const BASE_URL = 'http://localhost:5050/api/admin';
+
+export const fetchAllRestaurants = async (token) => {
+  console.log("Sending token:", token); // 🔍 Debug
+  const res = await fetch(`${BASE_URL}/restaurants`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error('Failed to fetch restaurants');
+  return await res.json();
+};
+
+
+export const verifyRestaurant = async (id, token) => {
+  const res = await fetch(`${BASE_URL}/verify-restaurant/${id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error('Failed to verify restaurant');
+  return await res.json();
+};
+

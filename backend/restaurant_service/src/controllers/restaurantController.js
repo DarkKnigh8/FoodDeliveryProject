@@ -35,22 +35,37 @@ exports.createRestaurant = async (req, res) => {
 };
 
 
-// Get all restaurants (for customer/admin)
+
+// Only return verified restaurants for normal access
 exports.getAllRestaurants = async (req, res) => {
   try {
-    let restaurants;
-    if (req.user?.role === 'admin') {
-      restaurants = await Restaurant.find();
-    } else if (req.user?.role === 'restaurant') {
-      restaurants = await Restaurant.find({ owner: req.user.id });
-    } else {
-      restaurants = await Restaurant.find(); // Public access for customers
-    }
+    const restaurants = await Restaurant.find({ isVerified: true });
     res.json(restaurants);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
+///restraunts owners can view their restaunts
+exports.getMyRestaurants = async (req, res) => {
+  try {
+    const restaurants = await Restaurant.find({ owner: req.user.id });
+    res.json(restaurants);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+//get all restunta by admin
+exports.getAllRestaurantsAdmin = async (req, res) => {
+  try {
+    const restaurants = await Restaurant.find(); // Or add filter if needed
+    res.json(restaurants);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 // /Add menu item
 exports.addMenuItem = async (req, res) => {
@@ -191,3 +206,21 @@ exports.setAvailability = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+//verify restunats
+exports.verifyRestaurant = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findById(req.params.id);
+    if (!restaurant) {
+      return res.status(404).json({ message: 'Restaurant not found' });
+    }
+
+    restaurant.isVerified = true;
+    await restaurant.save();
+
+    res.json({ message: 'Restaurant verified successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+

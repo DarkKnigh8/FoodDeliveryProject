@@ -10,7 +10,12 @@ export default function RestaurantDashboard() {
   const [showModal, setShowModal] = useState(false);
 
   const fetchRestaurants = () => {
-    restaurantAPI.get('/restaurants')
+    restaurantAPI
+      .get('/restaurants/my', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
       .then((res) => setRestaurants(res.data))
       .catch((err) => console.error(err));
   };
@@ -126,6 +131,13 @@ export default function RestaurantDashboard() {
                     {r.isAvailable ? 'Open ✅' : 'Closed ❌'}
                   </span>
                 </p>
+                <p className="mt-1">
+                  Verification:{' '}
+                  <span className={r.isVerified ? 'text-green-600' : 'text-red-600'}>
+                    {r.isVerified ? 'Verified ✅' : 'Unverified ❌'}
+                  </span>
+                </p>
+
                 {r.image && (
                   <img
                     src={r.image}
