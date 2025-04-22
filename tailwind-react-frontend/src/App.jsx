@@ -11,6 +11,7 @@ import AdminResRegistration from './pages/AdminResRegistration'
 
 import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
+import TrackOrder from './pages/TrackOrder'; // ✅ newly added
 
 import Navigation from './components/Navigation';
 
@@ -51,6 +52,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['customer']}>
                 <MyOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/track/:orderId"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <TrackOrder />
               </ProtectedRoute>
             }
           />
