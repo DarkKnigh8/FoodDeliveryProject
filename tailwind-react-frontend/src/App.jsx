@@ -17,6 +17,9 @@ import TrackOrder from './pages/TrackOrder'; // ✅ newly added
 
 import Navigation from './components/Navigation';
 
+import Checkout from './pages/Checkout';
+import DeliveryTracker from './pages/DeliveryTracker';
+
 function App() {
   return (
     <BrowserRouter>
@@ -67,6 +70,11 @@ function App() {
             }
           />
         </Routes>
+         {/* ✅ Delivery Service Integration */}
+         <Routes>
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/delivery-status/:deliveryId" element={<DeliveryTracker />} />
+      </Routes>
       </div>
     </BrowserRouter>
   );

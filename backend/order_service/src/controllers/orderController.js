@@ -131,6 +131,17 @@ exports.editOrder = async (req, res) => {
   }
 };
 
+//for the delivery service to get order by ID
+exports.getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    res.json(order);
+  } catch (err) {
+    console.error('Error fetching order by ID:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 // // Secure: Update status of an order (restaurant owner only)
 // exports.updateOrderStatus = async (req, res) => {
 //   const { orderId } = req.params;

@@ -92,3 +92,73 @@ export const editOrder = async (orderId, updatedData) => {
   });
   return res.json();
 };
+
+//delivery service eke ewa mock
+// src/services/api.js
+
+// export const confirmCheckout = async (checkoutData) => {
+//   const res = await fetch('http://localhost:5006/api/deliveries/checkout', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Bearer ${localStorage.getItem('token')}`,
+//     },
+//     body: JSON.stringify(checkoutData),
+//   });
+//   return res.json();
+// };
+
+// export const fetchDeliveryDetails = async (deliveryId) => {
+//   const res = await fetch(`http://localhost:5006/api/deliveries/${deliveryId}`, {
+//     headers: {
+//       Authorization: `Bearer ${localStorage.getItem('token')}`,
+//     },
+//   });
+//   return res.json();
+// };
+
+// export const fetchOrderDetails = async (orderId) => {
+//   const res = await fetch(`http://localhost:5005/api/orders/${orderId}`, {
+//     headers: {
+//       Authorization: `Bearer ${localStorage.getItem('token')}`,
+//     },
+//   });
+//   return res.json();
+// };
+
+// src/services/api.js
+
+export const fetchOrderDetails = async (orderId) => {
+  const res = await fetch(`http://localhost:5005/api/orders/${orderId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  const data = await res.json();
+  console.log('Fetched Order Details:', data); // ✅ Debug log
+  return data;
+};
+
+export const confirmCheckout = async (checkoutData) => {
+  const res = await fetch('http://localhost:5006/api/deliveries/checkout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify(checkoutData),
+  });
+  const data = await res.json();
+  console.log('Checkout Confirmation Response:', data); // ✅ Debug log
+  return data;
+};
+
+export const fetchDeliveryDetails = async (deliveryId) => {
+  const res = await fetch(`http://localhost:5006/api/deliveries/${deliveryId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  const data = await res.json();
+  return data;
+};

@@ -1,17 +1,10 @@
-import express from 'express';
-import {
-  createDelivery,
-  assignDelivery,
-  updateStatus,
-  getDeliveriesByPerson
-} from '../controllers/deliveryController.js';
-//import { authenticate, requireRole } from '../middleware/authMiddleware.js';
-
+const express = require('express');
 const router = express.Router();
+const { confirmCheckout } = require('../controllers/deliveryController');
+const { authenticate } = require('../middleware/authMiddleware');
 
-router.post('/', createDelivery);
-router.post('/:id/assign', assignDelivery);
-router.put('/:id/status', updateStatus);
-router.get('/my', getDeliveriesByPerson);
+router.use(authenticate);
 
-export default router;
+router.post('/checkout', confirmCheckout);
+
+module.exports = router;

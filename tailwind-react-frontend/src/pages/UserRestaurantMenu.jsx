@@ -5,6 +5,7 @@ import { restaurantAPI } from '../services/api';
 export default function UserRestaurantMenu() {
   const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,10 +18,17 @@ export default function UserRestaurantMenu() {
       .catch((err) => console.error(err));
   }, [id]);
 
+  const handleAddToCart = (item) => {
+    // Avoid duplicates
+    if (!selectedItems.find((i) => i._id === item._id)) {
+      setSelectedItems([...selectedItems, item]);
+    }
+  };
+
   const handleStartOrder = () => {
     navigate('/createorder', {
       state: {
-        selectedItems: restaurant.menu.filter((item) => item.available),
+        selectedItems,
         restaurantId: restaurant._id,
         restaurantName: restaurant.name,
         location: restaurant.location,
@@ -78,30 +86,31 @@ export default function UserRestaurantMenu() {
                   </p>
 
                   <button
-                  // onClick={() =>
-                  //   navigate('/createorder', {
-                  //     state: { item: { ...item, restaurantId: id } },
-                  //   })
-                  // }
-                  disabled
-                  className="w-full py-2 rounded-lg text-white text-sm font-medium transition bg-gray-400 cursor-not-allowed"
-                >
-                  Order
-                </button>
-
+                    onClick={() => handleAddToCart(item)}
+                    disabled={!item.available || selectedItems.find((i) => i._id === item._id)}
+                    className={`w-full py-2 rounded-lg text-white text-sm font-medium transition ${
+                      item.available && !selectedItems.find((i) => i._id === item._id)
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'bg-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {selectedItems.find((i) => i._id === item._id) ? 'Added' : 'Add to Cart'}
+                  </button>
                 </div>
               ))}
             </div>
 
             {/* 🛒 Global Start Order Button */}
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={handleStartOrder}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg rounded shadow"
-              >
-                Start Order
-              </button>
-            </div>
+            {selectedItems.length > 0 && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={handleStartOrder}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg rounded shadow"
+                >
+                  Show Cart ({selectedItems.length})
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <p className="text-gray-600">No menu available.</p>
