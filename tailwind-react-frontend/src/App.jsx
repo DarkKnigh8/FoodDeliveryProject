@@ -7,7 +7,9 @@ import Register from './pages/Register';
 import Landing from './pages/Landing';
 import AdminDashbord from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminResRegistration from './pages/AdminResRegistration'
+import AdminResRegistration from './pages/AdminResRegistration';
+import ManageOrders from './pages/ManageOrders';
+
 
 import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
@@ -37,6 +39,7 @@ function App() {
           <Route path="/restaurants/:id" element={<UserRestaurantMenu />} />
           <Route path="/adminDashboard" element={<AdminDashbord />} />
           <Route path="/resReg" element={<AdminResRegistration />} />
+          <Route path="/restaurants/:restaurantId/orders" element={<ManageOrders />} />
 
 
           <Route

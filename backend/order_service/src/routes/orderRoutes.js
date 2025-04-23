@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { placeOrder, getMyOrders, updateOrderStatus,getOrderTracking, updateOrderLocation  } = require('../controllers/orderController');
+const { placeOrder, getMyOrders, updateOrderStatus,getOrderTracking, updateOrderLocation,getOrdersByRestaurant  } = require('../controllers/orderController');
 const { authenticate } = require('../middleware/authMiddleware');
 
 router.use(authenticate);

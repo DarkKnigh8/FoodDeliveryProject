@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 
+const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || 'http://localhost:5005/api/orders';
+
+
 const deleteImageFile = (imageUrl) => {
   if (!imageUrl) return;
 
@@ -221,6 +224,46 @@ exports.verifyRestaurant = async (req, res) => {
     res.json({ message: 'Restaurant verified successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.fetchOrdersForRestaurant = async (req, res) => {
+  const { restaurantId } = req.params;
+
+  try {
+    const response = await fetch(`${ORDER_SERVICE_URL}/restaurant/${restaurantId}`, {
+      headers: {
+        'Authorization': `Bearer ${req.headers.authorization?.split(' ')[1]}`
+      }
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error('Error fetching orders from order service:', err);
+    res.status(500).json({ message: 'Failed to fetch orders' });
+  }
+};
+
+exports.updateOrderStatusForOrderService = async (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+
+  try {
+    const response = await fetch(`${ORDER_SERVICE_URL}/${orderId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${req.headers.authorization?.split(' ')[1]}`
+      },
+      body: JSON.stringify({ status })
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error('Error updating order status in order service:', err);
+    res.status(500).json({ message: 'Failed to update order status' });
   }
 };
 

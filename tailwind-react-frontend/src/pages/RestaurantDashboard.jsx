@@ -1,5 +1,5 @@
-
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MenuManager from '../components/MenuManager';
 import { restaurantAPI } from '../services/api';
 
@@ -8,14 +8,11 @@ export default function RestaurantDashboard() {
   const [form, setForm] = useState({ name: '', location: '', _id: null });
   const [image, setImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate(); // for redirecting to manage orders page
 
   const fetchRestaurants = () => {
     restaurantAPI
-      .get('/restaurants/my', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      })
+      .get('/restaurants/my')
       .then((res) => setRestaurants(res.data))
       .catch((err) => console.error(err));
   };
@@ -146,13 +143,15 @@ export default function RestaurantDashboard() {
                   />
                 )}
               </div>
-              <div className="space-x-2">
+              <div className="space-y-2 text-right">
                 <button
                   onClick={() => toggleRestaurantAvailability(r._id, !r.isAvailable)}
                   className="px-3 py-1 bg-yellow-500 text-white rounded"
                 >
                   Set {r.isAvailable ? 'Closed' : 'Open'}
                 </button>
+                <div className="flex flex-wrap gap-2 mt-4">
+                
                 <button onClick={() => handleEdit(r)} className="px-3 py-1 bg-blue-500 text-white rounded">
                   Edit
                 </button>
@@ -162,6 +161,13 @@ export default function RestaurantDashboard() {
                 >
                   Delete
                 </button>
+                <button
+                  onClick={() => navigate(`/restaurants/${r._id}/orders`)}
+                  className="px-3 py-1 bg-purple-600 text-white rounded"
+                >
+                  Manage Orders
+                </button>
+              </div>
               </div>
             </div>
 

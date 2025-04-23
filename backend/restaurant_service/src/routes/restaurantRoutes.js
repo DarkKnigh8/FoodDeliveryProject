@@ -31,7 +31,11 @@ router.get('/my', authenticate, requireRole('restaurant'), controller.getMyResta
 router.get('/all', authenticate, requireRole('admin'), controller.getAllRestaurantsAdmin);
 /*router.put('/verify/:id', authenticate, requireRole('admin'), controller.verifyRestaurant);*/
 
+// Fetch orders for a restaurant
+router.get('/:restaurantId/orders', authenticate, requireRole('restaurant'), controller.fetchOrdersForRestaurant);
 
+// Update order status
+router.put('/orders/:orderId/status', authenticate, requireRole('restaurant'), controller.updateOrderStatusForOrderService);
 
 
 

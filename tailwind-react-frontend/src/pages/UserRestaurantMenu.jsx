@@ -19,7 +19,11 @@ export default function UserRestaurantMenu() {
 
   const handleStartOrder = () => {
     navigate('/createorder', {
-      state: { menu: restaurant.menu, restaurantId: restaurant._id },
+      state: {
+        selectedItems: restaurant.menu.filter((item) => item.available),
+        restaurantId: restaurant._id,
+        restaurantName: restaurant.name
+      },
     });
   };
 
@@ -73,20 +77,17 @@ export default function UserRestaurantMenu() {
                   </p>
 
                   <button
-                    onClick={() =>
-                      navigate('/createorder', {
-                        state: { item: { ...item, restaurantId: id } },
-                      })
-                    }
-                    disabled={!item.available}
-                    className={`w-full py-2 rounded-lg text-white text-sm font-medium transition ${
-                      item.available
-                        ? 'bg-blue-600 hover:bg-blue-700'
-                        : 'bg-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    Order
-                  </button>
+                  // onClick={() =>
+                  //   navigate('/createorder', {
+                  //     state: { item: { ...item, restaurantId: id } },
+                  //   })
+                  // }
+                  disabled
+                  className="w-full py-2 rounded-lg text-white text-sm font-medium transition bg-gray-400 cursor-not-allowed"
+                >
+                  Order
+                </button>
+
                 </div>
               ))}
             </div>

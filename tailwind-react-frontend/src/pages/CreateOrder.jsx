@@ -9,7 +9,7 @@ import { mockMenu } from '../mock/mockMenu';
 export default function CreateOrder() {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const menu = state?.menu || [];
+  const menu = state?.selectedItems || [];
   const restaurantId = state?.restaurantId;
 //   const menu = mockMenu;
 
