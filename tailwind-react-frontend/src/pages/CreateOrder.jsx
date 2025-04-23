@@ -8,7 +8,7 @@ export default function CreateOrder() {
   const navigate = useNavigate();
   const menu = state?.selectedItems || [];
   const restaurantId = state?.restaurantId;
-  const restaurantName = state?.name;
+  const restaurantName = state?.restaurantName;
   const restaurantLocation = state?.location;
 
   const [quantities, setQuantities] = useState({});
