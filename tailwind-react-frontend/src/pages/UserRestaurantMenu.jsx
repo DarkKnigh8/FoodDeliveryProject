@@ -22,7 +22,8 @@ export default function UserRestaurantMenu() {
       state: {
         selectedItems: restaurant.menu.filter((item) => item.available),
         restaurantId: restaurant._id,
-        restaurantName: restaurant.name
+        restaurantName: restaurant.name,
+        location: restaurant.location,
       },
     });
   };

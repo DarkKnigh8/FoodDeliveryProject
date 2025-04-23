@@ -102,6 +102,34 @@ exports.getOrdersByRestaurant = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch restaurant orders' });
   }
 };
+exports.deleteOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findByIdAndDelete(orderId);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json({ message: 'Order deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete order' });
+  }
+};
+
+exports.editOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { items, totalPrice } = req.body;
+
+    const updated = await Order.findByIdAndUpdate(
+      orderId,
+      { items, totalPrice },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: 'Order not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update order' });
+  }
+};
 
 // // Secure: Update status of an order (restaurant owner only)
 // exports.updateOrderStatus = async (req, res) => {
