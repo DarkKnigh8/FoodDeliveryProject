@@ -1,21 +1,33 @@
-const express = require("express");
-require("dotenv").config();
-require('./config/database'); // Ensure MongoDB connection;
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+const orderRoutes = require('./routes/orderRoutes');
+const { errorHandler } = require('./middleware/errorMiddleware');
+const { requestLogger } = require('./middleware/requestLogger');
 
 
-const orderRoutes = require("./routes/orderRoutes");
-const requestLogger = require("./middleware/requestLogger");
-const errorMiddleware = require("./middleware/errorMiddleware");
+
+dotenv.config();
+connectDB();
 
 const app = express();
-app.use(express.json());
-app.use(requestLogger); // Log incoming requests
-const cors = require('cors');
+
+// Middleware
 app.use(cors());
+app.use(express.json());
+app.use(requestLogger);
 
-app.use("/api/orders", orderRoutes); // Order routes
+// Routes
+app.use('/api/orders', orderRoutes);
 
-app.use(errorMiddleware); // Global error handler
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Order Service running on port ${PORT}`));
+
+// Error handler (should be last)
+app.use(errorHandler);
+
+// Start server directly here
+const PORT = process.env.PORT || 5005;
+app.listen(PORT, () => {
+  console.log(`Order Service running on port ${PORT}`);
+});

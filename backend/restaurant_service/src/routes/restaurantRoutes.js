@@ -7,6 +7,9 @@ const { restaurantImageUpload, menuImageUpload } = require('../middlewares/image
 // Read
 router.get('/', authenticate, controller.getAllRestaurants);
 router.get('/:restaurantId/menu', controller.getMenuItems);
+router.put('/verify/:id', authenticate, requireRole('admin'), controller.verifyRestaurant);
+router.get('/admin/all', authenticate, requireRole('admin'), controller.getAllRestaurantsAdmin);
+
 
 // Create
 router.post('/', authenticate, requireRole('restaurant'), restaurantImageUpload.single('image'), controller.createRestaurant);
@@ -22,5 +25,18 @@ router.delete('/:restaurantId', authenticate, requireRole('restaurant'), control
 
 // Availability
 router.put('/:restaurantId/availability', authenticate, requireRole('restaurant'), controller.setAvailability);
+
+
+router.get('/my', authenticate, requireRole('restaurant'), controller.getMyRestaurants);
+router.get('/all', authenticate, requireRole('admin'), controller.getAllRestaurantsAdmin);
+/*router.put('/verify/:id', authenticate, requireRole('admin'), controller.verifyRestaurant);*/
+
+// Fetch orders for a restaurant
+router.get('/:restaurantId/orders', authenticate, requireRole('restaurant'), controller.fetchOrdersForRestaurant);
+
+// Update order status
+router.put('/orders/:orderId/status', authenticate, requireRole('restaurant'), controller.updateOrderStatusForOrderService);
+
+
 
 module.exports = router;
