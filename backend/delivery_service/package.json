@@ -1,8 +1,8 @@
 {
   "name": "delivery_service",
   "version": "1.0.0",
-  "main": "index.js",
-  "type": "module",
+  "main": "app.js",
+ 
   "scripts": {
   "start": "node src/app.js"
 },

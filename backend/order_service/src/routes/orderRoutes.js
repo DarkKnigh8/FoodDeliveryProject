@@ -9,6 +9,7 @@ const {
   getOrdersByRestaurant,
   deleteOrder,
   editOrder,
+  getOrderById
 } = require('../controllers/orderController');
 const { authenticate } = require('../middleware/authMiddleware');
 
@@ -22,5 +23,6 @@ router.put('/:orderId/location', updateOrderLocation);
 router.get('/restaurant/:restaurantId', getOrdersByRestaurant);
 router.delete('/:orderId', deleteOrder);
 router.put('/:orderId/edit', editOrder);
+router.get('/:orderId', getOrderById); // ✅ Add this line
 
 module.exports = router;

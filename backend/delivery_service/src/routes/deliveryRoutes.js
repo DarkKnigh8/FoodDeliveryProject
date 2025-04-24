@@ -1,17 +1,12 @@
-import express from 'express';
-import {
-  createDelivery,
-  assignDelivery,
-  updateStatus,
-  getDeliveriesByPerson
-} from '../controllers/deliveryController.js';
-//import { authenticate, requireRole } from '../middleware/authMiddleware.js';
-
+const express = require('express');
 const router = express.Router();
+const { confirmCheckout } = require('../controllers/deliveryController');
+const { authenticate, requireRole } = require('../middleware/authMiddleware');
 
-router.post('/', createDelivery);
-router.post('/:id/assign', assignDelivery);
-router.put('/:id/status', updateStatus);
-router.get('/my', getDeliveriesByPerson);
+// Use authentication middleware for all routes in this router
+router.use(authenticate);
 
-export default router;
+// Example route where role-based access is enforced
+router.post('/checkout', requireRole('customer'), confirmCheckout);
+
+module.exports = router;
