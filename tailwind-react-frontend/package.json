@@ -9,11 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "axios": "^1.8.4",
     "leaflet": "^1.9.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+<<<<<<< HEAD
     "react-leaflet": "^4.2.1",
+=======
+>>>>>>> 49486bf853f9d5ca0ad6582ac3250bdcf55a34e9
     "react-router-dom": "^7.5.1",
     "socket.io-client": "^4.8.1"
   },
@@ -22,6 +26,6 @@
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.3.2",
-    "vite": "^4.4.9"
+    "vite": "^6.3.2"
   }
 }

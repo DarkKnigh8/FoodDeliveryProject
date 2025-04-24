@@ -26,8 +26,13 @@ export default function Login() {
       } else if (user?.role === 'customer') {
         navigate('/home'); // or '/customerDashboard' if you have one
       }else if (user?.role === 'delivery') {
+<<<<<<< HEAD
         navigate('/adminDashboard');
       }else {
+=======
+        navigate('/home'); // or '/customerDashboard' if you have one
+      } else {
+>>>>>>> 49486bf853f9d5ca0ad6582ac3250bdcf55a34e9
         alert('Unknown user role');
       }
     } catch (err) {

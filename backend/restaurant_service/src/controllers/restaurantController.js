@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 
+const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || 'http://localhost:5005/api/orders';
+
+
 const deleteImageFile = (imageUrl) => {
   if (!imageUrl) return;
 
@@ -35,22 +38,37 @@ exports.createRestaurant = async (req, res) => {
 };
 
 
-// Get all restaurants (for customer/admin)
+
+// Only return verified restaurants for normal access
 exports.getAllRestaurants = async (req, res) => {
   try {
-    let restaurants;
-    if (req.user?.role === 'admin') {
-      restaurants = await Restaurant.find();
-    } else if (req.user?.role === 'restaurant') {
-      restaurants = await Restaurant.find({ owner: req.user.id });
-    } else {
-      restaurants = await Restaurant.find(); // Public access for customers
-    }
+    const restaurants = await Restaurant.find({ isVerified: true });
     res.json(restaurants);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
+///restraunts owners can view their restaunts
+exports.getMyRestaurants = async (req, res) => {
+  try {
+    const restaurants = await Restaurant.find({ owner: req.user.id });
+    res.json(restaurants);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+//get all restunta by admin
+exports.getAllRestaurantsAdmin = async (req, res) => {
+  try {
+    const restaurants = await Restaurant.find(); // Or add filter if needed
+    res.json(restaurants);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 // /Add menu item
 exports.addMenuItem = async (req, res) => {
@@ -187,6 +205,96 @@ exports.setAvailability = async (req, res) => {
     restaurant.isAvailable = req.body.isAvailable;
     const updated = await restaurant.save();
     res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+//verify restunats
+exports.verifyRestaurant = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findById(req.params.id);
+    if (!restaurant) {
+      return res.status(404).json({ message: 'Restaurant not found' });
+    }
+
+    restaurant.isVerified = true;
+    await restaurant.save();
+
+    res.json({ message: 'Restaurant verified successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.fetchOrdersForRestaurant = async (req, res) => {
+  const { restaurantId } = req.params;
+
+  try {
+    const response = await fetch(`${ORDER_SERVICE_URL}/restaurant/${restaurantId}`, {
+      headers: {
+        'Authorization': `Bearer ${req.headers.authorization?.split(' ')[1]}`
+      }
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error('Error fetching orders from order service:', err);
+    res.status(500).json({ message: 'Failed to fetch orders' });
+  }
+};
+
+exports.updateOrderStatusForOrderService = async (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+
+  try {
+    const response = await fetch(`${ORDER_SERVICE_URL}/${orderId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${req.headers.authorization?.split(' ')[1]}`
+      },
+      body: JSON.stringify({ status })
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error('Error updating order status in order service:', err);
+    res.status(500).json({ message: 'Failed to update order status' });
+  }
+};
+
+// Controller function to search for restaurants and menu items
+// Search restaurants by name or menu item
+exports.searchRestaurants = async (req, res) => {
+  const { query } = req.query;
+
+  if (!query) {
+    return res.status(400).json({ message: 'No search query provided' });
+  }
+
+  try {
+    // Case-insensitive regex search for restaurants by name
+    const restaurantsByName = await Restaurant.find({
+      name: { $regex: query, $options: 'i' },
+      isVerified: true
+    });
+
+    // Case-insensitive regex search for menu items
+    const restaurantsByMenuItem = await Restaurant.find({
+      'menu.name': { $regex: query, $options: 'i' },
+      isVerified: true
+    });
+
+    const result = {
+      restaurantsByName,
+      restaurantsByMenuItem
+    };
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
