@@ -19,14 +19,15 @@ export default function Login() {
   
       const user = res.data.user;
   
-      // Role-based redirects
       if (user?.role === 'restaurant') {
         navigate('/restaurantDashboard');
       } else if (user?.role === 'admin') {
         navigate('/adminDashboard');
       } else if (user?.role === 'customer') {
         navigate('/home'); // or '/customerDashboard' if you have one
-      } else {
+      }else if (user?.role === 'delivery') {
+        navigate('/adminDashboard');
+      }else {
         alert('Unknown user role');
       }
     } catch (err) {
