@@ -74,7 +74,7 @@ export default function Checkout() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-6">
+    <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-20">
       <h1 className="text-2xl font-bold mb-4">Checkout for Order #{orderId}</h1>
 
       <input
