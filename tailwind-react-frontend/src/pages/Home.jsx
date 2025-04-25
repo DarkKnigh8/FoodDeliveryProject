@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { restaurantAPI } from '../services/api';
 
+
 export default function Home() {
   const [restaurants, setRestaurants] = useState([]);
   const navigate = useNavigate();
@@ -13,11 +14,51 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10">
+    <div className="min-h-screen bg-gray-50 px-4 py-10 mt-20">
+      
+
+      {/* Recommended Restaurants */}
+      <div className="mb-12">
+        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-5">
+          Recommended Restaurants
+        </h2>
+
+        <div className="flex overflow-x-auto space-x-4 p-4">
+          {restaurants.slice(0, 5).map((r) => (
+            <div
+              key={r._id}
+              onClick={() => navigate(`/restaurants/${r._id}`)}
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer group w-60"
+            >
+              {r.image && (
+                <img
+                  src={r.image}
+                  alt={r.name}
+                  className="h-40 w-full object-cover rounded-t-2xl"
+                />
+              )}
+
+              <div className="p-5">
+                <h2 className="text-2xl font-semibold text-gray-800 group-hover:text-blue-600 transition">
+                  {r.name}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  📍 {r.location || 'No location'}
+                </p>
+                <p className={`text-sm mt-2 font-medium ${r.isAvailable ? 'text-green-600' : 'text-red-500'}`}>
+                  {r.isAvailable ? 'Open ✅' : 'Closed ❌'}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+
       <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-10">
         🍽️ Explore Restaurants
       </h1>
-
+      {/* Display All Restaurants */}
       {restaurants.length === 0 ? (
         <p className="text-center text-gray-500 text-lg">Loading restaurants...</p>
       ) : (
@@ -74,6 +115,7 @@ export default function Home() {
           ))}
         </div>
       )}
+     
     </div>
   );
 }

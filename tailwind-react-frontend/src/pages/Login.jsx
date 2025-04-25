@@ -26,6 +26,8 @@ export default function Login() {
         navigate('/adminDashboard');
       } else if (user?.role === 'customer') {
         navigate('/home'); // or '/customerDashboard' if you have one
+      }else if (user?.role === 'delivery') {
+        navigate('/home'); // or '/customerDashboard' if you have one
       } else {
         alert('Unknown user role');
       }

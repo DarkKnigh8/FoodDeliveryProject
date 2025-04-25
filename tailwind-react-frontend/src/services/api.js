@@ -17,6 +17,21 @@ restaurantAPI.interceptors.request.use((config) => {
   return config;
 });
 
+
+const API_BASE_URL = 'http://localhost:5000/api/restaurants'; // Adjust if different
+
+export const searchRestaurants = async (query, token) => {
+  const response = await fetch(`${API_BASE_URL}/search?query=${query}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  const data = await response.json();
+  return data;
+};
+
+
+
 // --------------------
 // AUTH SERVICE (port 5001)
 // --------------------

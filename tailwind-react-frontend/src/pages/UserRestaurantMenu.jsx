@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { restaurantAPI } from '../services/api';
 
+
 export default function UserRestaurantMenu() {
   const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
@@ -33,7 +34,8 @@ export default function UserRestaurantMenu() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10">
+    <div className="min-h-screen bg-gray-50 px-4 py-10 mt-20">
+      
       <div className="max-w-5xl mx-auto">
         <Link to="/home" className="text-blue-600 hover:underline text-sm mb-6 inline-block">
           ← Back to Restaurants

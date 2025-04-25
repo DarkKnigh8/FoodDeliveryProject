@@ -3,6 +3,7 @@ const router = express.Router();
 const controller = require('../controllers/restaurantController');
 const { authenticate, requireRole } = require('../middlewares/authMiddleware');
 const { restaurantImageUpload, menuImageUpload } = require('../middlewares/imageUpload');
+const { searchRestaurants } = require('../controllers/restaurantController'); // Import searchRestaurants
 
 // Read
 router.get('/', authenticate, controller.getAllRestaurants);
@@ -37,6 +38,8 @@ router.get('/:restaurantId/orders', authenticate, requireRole('restaurant'), con
 // Update order status
 router.put('/orders/:orderId/status', authenticate, requireRole('restaurant'), controller.updateOrderStatusForOrderService);
 
+// Search route
+router.get('/search', authenticate, controller.searchRestaurants);
 
 
 module.exports = router;

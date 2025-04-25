@@ -9,19 +9,21 @@ import AdminDashbord from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminResRegistration from './pages/AdminResRegistration';
 import ManageOrders from './pages/ManageOrders';
-
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
 import TrackOrder from './pages/TrackOrder'; // ✅ newly added
 
-import Navigation from './components/Navigation';
+//import Navigation from './components/Navigation';
 
 function App() {
   return (
     <BrowserRouter>
       <div className="p-4 bg-gray-100 min-h-screen">
-        <Navigation />
+          <Header />
+          <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -67,6 +69,8 @@ function App() {
             }
           />
         </Routes>
+      </div>
+      <Footer /> 
       </div>
     </BrowserRouter>
   );

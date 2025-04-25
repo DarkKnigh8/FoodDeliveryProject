@@ -45,7 +45,7 @@ export default function CreateOrder() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 my-20">
       {/* 🏪 Restaurant Info Card */}
       <div className="bg-white p-4 rounded shadow mb-6">
         <h2 className="text-2xl font-bold">{restaurantName}</h2>

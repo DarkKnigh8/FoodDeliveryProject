@@ -267,3 +267,35 @@ exports.updateOrderStatusForOrderService = async (req, res) => {
   }
 };
 
+// Controller function to search for restaurants and menu items
+// Search restaurants by name or menu item
+exports.searchRestaurants = async (req, res) => {
+  const { query } = req.query;
+
+  if (!query) {
+    return res.status(400).json({ message: 'No search query provided' });
+  }
+
+  try {
+    // Case-insensitive regex search for restaurants by name
+    const restaurantsByName = await Restaurant.find({
+      name: { $regex: query, $options: 'i' },
+      isVerified: true
+    });
+
+    // Case-insensitive regex search for menu items
+    const restaurantsByMenuItem = await Restaurant.find({
+      'menu.name': { $regex: query, $options: 'i' },
+      isVerified: true
+    });
+
+    const result = {
+      restaurantsByName,
+      restaurantsByMenuItem
+    };
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
