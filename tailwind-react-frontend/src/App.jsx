@@ -11,10 +11,12 @@ import ManageOrders from './pages/ManageOrders';
 import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import PaymentSuccess from './components/PaymentSuccess';
 import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
 import Checkout from './pages/Checkout';
 import TrackOrder from './pages/TrackOrder';
+import DeliveryTracker from './pages/DeliveryTracker'; // Assuming it's implemented
 
 function App() {
   return (
@@ -23,9 +25,14 @@ function App() {
         <Header />
         <main className="flex-grow">
           <Routes>
+            {/* Landing Page */}
             <Route path="/" element={<LandDes />} /> {/* Use LandDes component here */}
+            
+            {/* Authentication Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            
+            {/* Protected Routes */}
             <Route
               path="/home"
               element={
@@ -39,6 +46,8 @@ function App() {
             <Route path="/adminDashboard" element={<AdminDashboard />} />
             <Route path="/resReg" element={<AdminResRegistration />} />
             <Route path="/restaurants/:restaurantId/orders" element={<ManageOrders />} />
+            
+            {/* Customer Order Routes */}
             <Route
               path="/createorder"
               element={
@@ -63,7 +72,13 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Checkout and Payment Routes */}
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+
+            {/* Delivery Tracking */}
+            <Route path="/delivery-status/:deliveryId" element={<DeliveryTracker />} />
           </Routes>
         </main>
         <Footer />
