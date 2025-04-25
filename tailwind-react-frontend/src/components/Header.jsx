@@ -117,7 +117,7 @@ const Header = () => {
       </header>
 
       {/* Search Results Display */}
-      {searchResults && (
+    {searchResults && (
   <div className="mt-40 px-6">
     <h2 className="text-xl font-bold mb-2">Restaurants Matching Name:</h2>
     {searchResults.restaurantsByName.length > 0 ? (

@@ -18,6 +18,7 @@ restaurantAPI.interceptors.request.use((config) => {
 });
 
 
+////serach function
 const API_BASE_URL = 'http://localhost:5000/api/restaurants'; // Adjust if different
 
 export const searchRestaurants = async (query, token) => {
