@@ -4,7 +4,7 @@ const paymentSchema = new mongoose.Schema({
   orderId: String,
   userId: String,
   amount: Number,
-  currency: { type: String, default: 'usd' },
+  currency: { type: String, default: 'lkr' },
   paymentStatus: String,
   stripePaymentId: String
 }, { timestamps: true });

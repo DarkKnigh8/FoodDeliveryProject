@@ -9,6 +9,8 @@ import AdminDashbord from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminResRegistration from './pages/AdminResRegistration';
 import ManageOrders from './pages/ManageOrders';
+import PaymentSuccess from './components/PaymentSuccess';
+
 
 
 import CreateOrder from './pages/CreateOrder';
@@ -74,6 +76,8 @@ function App() {
          <Routes>
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/delivery-status/:deliveryId" element={<DeliveryTracker />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+
       </Routes>
       </div>
     </BrowserRouter>

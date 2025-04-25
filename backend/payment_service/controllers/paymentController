@@ -10,7 +10,7 @@ exports.testCheckout = async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
-          currency: 'usd',
+          currency: 'lkr',
           product_data: {
             name: `Order ${orderId}`,
           },
@@ -94,7 +94,8 @@ exports.confirmPayment = async (req, res) => {
       orderId: paymentIntent.metadata.orderId,
       userId: paymentIntent.metadata.userId,
       amount: paymentIntent.amount_received / 100, // Convert cents to dollars
-      currency: paymentIntent.currency,
+      //currency: paymentIntent.currency,
+      currency: 'lkr',
       paymentStatus: paymentIntent.status,
       stripePaymentId: paymentIntent.id
     });
