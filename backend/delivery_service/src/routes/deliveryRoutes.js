@@ -6,7 +6,6 @@ const { authenticate, requireRole } = require('../middleware/authMiddleware');
 // Use authentication middleware for all routes in this router
 router.use(authenticate);
 
-// Example route where role-based access is enforced
 // Only customers are allowed to confirm checkout
 router.post('/checkout', requireRole('customer'), confirmCheckout);
 

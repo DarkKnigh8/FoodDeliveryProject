@@ -9,8 +9,15 @@ import AdminDashbord from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminResRegistration from './pages/AdminResRegistration';
 import ManageOrders from './pages/ManageOrders';
+<<<<<<< HEAD
 import Header from './components/Header';
 import Footer from './components/Footer';
+=======
+import PaymentSuccess from './components/PaymentSuccess';
+
+
+
+>>>>>>> e38de91377ee84249d7a00651abc5597957b9cd0
 import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
 import Checkout from './pages/Checkout';
@@ -66,11 +73,46 @@ function App() {
               }
             />
 
+<<<<<<< HEAD
             {/* Checkout Route */}
             <Route path="/checkout" element={<Checkout />} />
           </Routes>
         </div>
         <Footer />
+=======
+          <Route
+            path="/createorder"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <CreateOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <MyOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/track/:orderId"
+            element={
+              <ProtectedRoute allowedRoles={['customer']}>
+                <TrackOrder />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+         {/* ✅ Delivery Service Integration */}
+         <Routes>
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/delivery-status/:deliveryId" element={<DeliveryTracker />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+
+      </Routes>
+>>>>>>> e38de91377ee84249d7a00651abc5597957b9cd0
       </div>
     </BrowserRouter>
   );

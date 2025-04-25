@@ -1,0 +1,110 @@
+const stripe = require('../config/stripe');
+const Payment = require('../models/Payment');
+
+// Test Checkout Logic (moved here from paymentRoutes)
+exports.testCheckout = async (req, res) => {
+  const { amount = 1500, orderId = "test-order", userId = "test-user" } = req.body;
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'lkr',
+          product_data: {
+            name: `Order ${orderId}`,
+          },
+          unit_amount: amount * 100, // in cents
+        },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: `http://localhost:5173/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `http://localhost:5173/payment-cancelled`,
+      metadata: {
+        orderId,
+        userId
+      }
+    });
+    
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+exports.createPaymentIntent = async (req, res) => {
+  const { amount, orderId, userId } = req.body;
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100, // Stripe expects amount in cents
+      currency: 'usd',
+      metadata: { orderId, userId }
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/*
+exports.confirmPayment = async (req, res) => {
+  const { paymentIntentId } = req.body;
+
+  try {
+    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    const payment = new Payment({
+      orderId: intent.metadata.orderId,
+      userId: intent.metadata.userId,
+      amount: intent.amount / 100,
+      currency: intent.currency,
+      paymentStatus: intent.status,
+      stripePaymentId: intent.id
+    });
+
+    await payment.save();
+    res.status(201).json(payment);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+*/
+
+// Confirm Payment Logic
+exports.confirmPayment = async (req, res) => {
+  const { sessionId } = req.body; // Get sessionId from request
+
+  try {
+    // Retrieve the session from Stripe using sessionId
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    // Retrieve the payment intent using session.payment_intent
+    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+
+    // Create and save the payment record to MongoDB
+    const payment = new Payment({
+      orderId: paymentIntent.metadata.orderId,
+      userId: paymentIntent.metadata.userId,
+      amount: paymentIntent.amount_received / 100, // Convert cents to dollars
+      //currency: paymentIntent.currency,
+      currency: 'lkr',
+      paymentStatus: paymentIntent.status,
+      stripePaymentId: paymentIntent.id
+    });
+
+    await payment.save(); // Save the payment to MongoDB
+    console.log("Payment saved:", payment); // For debugging
+    res.status(201).json(payment); // Send the payment data back to frontend
+  } catch (err) {
+    console.error("Error confirming payment:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -1,6 +1,23 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { confirmCheckout, fetchOrderDetails } from '../services/api';
+//import jwt_decode from 'jwt-decode';  // Correct import for jwt-decode
+
+
+
+// Function to extract user ID from JWT token
+const getUserIdFromToken = async () => {
+  const token = localStorage.getItem('token');  // Retrieve token from localStorage
+  if (token) {
+    const { default: jwt_decode } = await import('jwt-decode');  // Dynamically import jwt-decode
+    const decoded = jwt_decode(token);  // Decode the token to get the payload
+    return decoded.userId;  // Extract userId from decoded token
+  }
+  return null;  // Return null if no token is found
+};
+
+
+
 
 export default function Checkout() {
   const { state } = useLocation();
@@ -68,10 +85,50 @@ export default function Checkout() {
     }
   };*/
 
+
+  
+
+
   // Placeholder function for the "Pay Now" button (you can later link it to your payment service)
-  const handlePayNow = () => {
-    alert('Redirecting to payment service...'); // Replace this with the actual redirect to the payment service in the future
+  const handlePayNow = async () => {
+    const userId = getUserIdFromToken(); // Fetch user ID from JWT token
+    if (!userId) {
+      alert('Please log in first.');  // If no user ID is found, ask user to log in
+      return;
+    }
+  
+    if (!orderId || !totalAmount) {
+      alert('Order details are missing. Please confirm your order.');
+      return;
+    }
+  
+    const paymentData = {
+      orderId,  // Order ID
+      userId,   // User ID from JWT token
+      amount: totalAmount,  // Total amount
+    };
+  
+    // Send the payment data to the payment service to create a payment session
+    const response = await fetch("http://localhost:5004/api/payments/test-checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(paymentData),  // Send the data to the backend
+    });
+  
+    const data = await response.json();
+  
+    if (data.url) {
+      window.location.href = data.url;  // Redirect to Stripe Checkout page
+    } else {
+      alert('Payment initiation failed. Please try again later.');
+    }
   };
+  
+  
+  
+  
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-20">
