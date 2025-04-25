@@ -1,7 +1,8 @@
-const axios = require('axios'); // ✅ Add this
+const axios = require('axios');
 const Delivery = require('../models/Delivery');
 const Driver = require('../models/Driver');
 
+// Helper: Auto-assign an available driver
 const assignAvailableDriver = async () => {
   const driver = await Driver.findOne({ available: true });
   if (!driver) return null;
@@ -10,18 +11,20 @@ const assignAvailableDriver = async () => {
   return driver._id;
 };
 
+// Confirm Checkout Controller
 exports.confirmCheckout = async (req, res) => {
   try {
     const { orderId, address, phone, paymentMethod } = req.body;
 
     console.log('📥 Confirm Checkout Request:', { orderId, address, phone, paymentMethod });
 
+    // Validate required fields
     if (!orderId || !address || !phone) {
       console.log('❌ Missing Fields');
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // ✅ 1. Fetch order details from order_service
+    // Fetch order details from order service
     const orderServiceURL = `http://localhost:5005/api/orders/${orderId}`;
     let order;
 
@@ -38,15 +41,15 @@ exports.confirmCheckout = async (req, res) => {
 
     if (!order || !order.customerId) {
       console.log('❌ Order Not Found or Missing Customer ID');
-      return res.status(404).json({ message: 'Order not found from order_service' });
+      return res.status(404).json({ message: 'Order not found from order service' });
     }
 
-    // ✅ 2. Assign driver
+    // Assign available driver
     try {
       const assignedDriverId = await assignAvailableDriver();
       console.log('🚚 Assigned Driver ID:', assignedDriverId);
 
-      // ✅ 3. Save delivery
+      // Create and save new delivery
       const newDelivery = new Delivery({
         orderId,
         customerId: order.customerId,

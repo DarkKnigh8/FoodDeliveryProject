@@ -2,7 +2,6 @@
   "name": "delivery_service",
   "version": "1.0.0",
   "main": "app.js",
- 
   "scripts": {
     "start": "node src/app.js"
   },
