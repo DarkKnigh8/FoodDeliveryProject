@@ -13,6 +13,7 @@ export default function CreateOrder() {
 
   const [quantities, setQuantities] = useState({});
   const [loading, setLoading] = useState(false);
+  const [confirmedOrderId, setConfirmedOrderId] = useState(null);
 
   const handleQuantityChange = (item, qty) => {
     setQuantities((prev) => ({ ...prev, [item.name]: qty }));
@@ -28,16 +29,25 @@ export default function CreateOrder() {
 
   const total = selectedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  const handleOrder = async () => {
+  const handleConfirmOrder = async () => {
     setLoading(true);
     const res = await placeOrder({ restaurantId, items: selectedItems, totalPrice: total });
     setLoading(false);
 
     if (res._id) {
-      navigate('/orders');
+      setConfirmedOrderId(res._id); // ✅ Store real orderId here
+      alert('✅ Order confirmed! You can now proceed to checkout.');
     } else {
-      alert('❌ Failed to place order: ' + (res.error || 'Unknown error'));
+      alert('❌ Failed to confirm order: ' + (res.error || 'Unknown error'));
     }
+  };
+
+  const handleGoToCheckout = () => {
+    if (!confirmedOrderId) {
+      alert('⚠️ Please confirm your order first.');
+      return;
+    }
+    navigate('/checkout', { state: { orderId: confirmedOrderId } }); // ✅ Pass the confirmed orderId
   };
 
   if (!restaurantId || menu.length === 0) {
@@ -54,7 +64,7 @@ export default function CreateOrder() {
       </div>
 
       {/* 🍕 Menu Section */}
-      <h2 className="text-xl font-semibold mb-3">Menu</h2>
+      <h2 className="text-xl font-semibold mb-3">Cart Items</h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         {menu.map((item, idx) => (
           <MenuCard
@@ -83,13 +93,24 @@ export default function CreateOrder() {
             Total: LKR {total}
           </div>
 
-          <button
-            onClick={handleOrder}
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded text-base"
-          >
-            {loading ? 'Placing order...' : 'Confirm and Place Order'}
-          </button>
+          {/* 🚀 Dual Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={handleConfirmOrder}
+              disabled={loading}
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-3 rounded text-base"
+            >
+              {loading ? 'Confirming...' : 'Confirm Order'}
+            </button>
+
+            <button
+              onClick={handleGoToCheckout}
+              disabled={!confirmedOrderId}
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-3 rounded text-base"
+            >
+              Go to Checkout
+            </button>
+          </div>
         </div>
       )}
     </div>
