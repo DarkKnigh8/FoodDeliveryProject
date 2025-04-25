@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { restaurantAPI } from '../services/api';
 
-
 export default function UserRestaurantMenu() {
   const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
@@ -26,6 +25,10 @@ export default function UserRestaurantMenu() {
     }
   };
 
+  const handleRemoveFromCart = (item) => {
+    setSelectedItems(selectedItems.filter((i) => i._id !== item._id));
+  };
+
   const handleStartOrder = () => {
     navigate('/createorder', {
       state: {
@@ -43,7 +46,6 @@ export default function UserRestaurantMenu() {
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10 mt-20">
-      
       <div className="max-w-5xl mx-auto">
         <Link to="/home" className="text-blue-600 hover:underline text-sm mb-6 inline-block">
           ← Back to Restaurants
@@ -87,17 +89,30 @@ export default function UserRestaurantMenu() {
                     {item.available ? 'Available ✅' : 'Unavailable ❌'}
                   </p>
 
-                  <button
-                    onClick={() => handleAddToCart(item)}
-                    disabled={!item.available || selectedItems.find((i) => i._id === item._id)}
-                    className={`w-full py-2 rounded-lg text-white text-sm font-medium transition ${
-                      item.available && !selectedItems.find((i) => i._id === item._id)
-                        ? 'bg-blue-600 hover:bg-blue-700'
-                        : 'bg-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {selectedItems.find((i) => i._id === item._id) ? 'Added' : 'Add to Cart'}
-                  </button>
+                  {/* Add or Remove from Cart Buttons */}
+                  <div>
+                    <button
+                      onClick={() => handleAddToCart(item)}
+                      disabled={!item.available || selectedItems.find((i) => i._id === item._id)}
+                      className={`w-full py-2 rounded-lg text-white text-sm font-medium transition ${
+                        item.available && !selectedItems.find((i) => i._id === item._id)
+                          ? 'bg-blue-600 hover:bg-blue-700'
+                          : 'bg-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {selectedItems.find((i) => i._id === item._id) ? 'Added' : 'Add to Cart'}
+                    </button>
+
+                    {/* Show Remove button if item is in cart */}
+                    {selectedItems.find((i) => i._id === item._id) && (
+                      <button
+                        onClick={() => handleRemoveFromCart(item)}
+                        className="w-full py-2 mt-2 rounded-lg text-white text-sm font-medium bg-red-600 hover:bg-red-700"
+                      >
+                        Remove from Cart
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
