@@ -1,45 +1,37 @@
-<<<<<<< HEAD
-import { io } from "socket.io-client";
+import Delivery from './models/Delivery.js';
+import { Server } from 'socket.io';
 
-const socket = io("http://localhost:5003"); // Delivery service socket server
+let io;
 
-socket.on("connect", () => {
-  console.log("Connected to Socket.IO server");
+export const setupSocket = (server) => {
+  io = new Server(server, {
+    cors: {
+      origin: 'http://localhost:5173',
+      methods: ['GET', 'POST'],
+    },
+  });
 
-  let lat = 6.9271;
-  let lng = 79.8612;
-
-  setInterval(() => {
-    lat += 0.0003;
-    lng += 0.0003;
-
-    socket.emit("locationUpdate", {
-      deliveryId: "driver123",
-      lat,
-      lng,
-    });
-
-    console.log(`Sent: ${lat}, ${lng}`);
-  }, 2000);
-});
-
-socket.on("connect_error", (err) => {
-  console.error("Connection error:", err.message);
-});
-=======
-const Delivery = require('./models/Delivery');
-
-const setupSocket = (io) => {
   io.on('connection', (socket) => {
     console.log('WebSocket Connected:', socket.id);
 
-    // Driver sends live location
     socket.on('driverLocationUpdate', async ({ deliveryId, lat, lng }) => {
-      await Delivery.findByIdAndUpdate(deliveryId, { driverLocation: { lat, lng } });
-      io.emit(`track-${deliveryId}`, { lat, lng });
+      try {
+        await Delivery.findByIdAndUpdate(deliveryId, { driverLocation: { lat, lng } });
+        io.emit(`track-${deliveryId}`, { lat, lng });
+      } catch (err) {
+        console.error(`Error updating delivery location for ${deliveryId}:`, err.message);
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected:', socket.id);
     });
   });
 };
 
-module.exports = setupSocket;
->>>>>>> 49486bf853f9d5ca0ad6582ac3250bdcf55a34e9
+export const getIO = () => {
+  if (!io) {
+    throw new Error('Socket.io not initialized!');
+  }
+  return io;
+};

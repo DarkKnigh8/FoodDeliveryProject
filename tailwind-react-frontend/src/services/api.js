@@ -39,7 +39,7 @@ export const authAPI = axios.create({
   baseURL: 'http://localhost:5001/api/auth',
 });
 
-<<<<<<< HEAD
+
 
 
 // Delivery service (usually on port 5003)
@@ -52,7 +52,6 @@ deliveryAPI.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-=======
 // --------------------
 // ORDER SERVICE (port 5005)
 // --------------------
@@ -191,4 +190,4 @@ export const fetchDeliveryDetails = async (deliveryId) => {
   const data = await res.json();
   return data;
 };
->>>>>>> 49486bf853f9d5ca0ad6582ac3250bdcf55a34e9
+
