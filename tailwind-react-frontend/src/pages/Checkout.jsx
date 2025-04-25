@@ -62,11 +62,11 @@ export default function Checkout() {
     }
   };
 
-  const handleTrackOrder = () => {
+  /*const handleTrackOrder = () => {
     if (confirmedDeliveryId) {
       navigate(`/delivery-status/${confirmedDeliveryId}`);
     }
-  };
+  };*/
 
   // Placeholder function for the "Pay Now" button (you can later link it to your payment service)
   const handlePayNow = () => {
@@ -133,12 +133,11 @@ export default function Checkout() {
           <p className="text-green-600 font-semibold">
             Delivery confirmed!
           </p>
-          <button
-            onClick={handleTrackOrder}
+          {<button
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
           >
             Track Your Order
-          </button>
+          </button> }
           {/* Pay Now Button */}
           <button
             onClick={handlePayNow}
