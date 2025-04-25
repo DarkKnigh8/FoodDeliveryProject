@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
 const setupSocket = require('./socket');
-const driverRoutes = require('./routes/driverRoutes');
-const deliveryRoutes = require('./routes/deliveryRoutes');
+//const driverRoutes = require('./routes/driverRoutes');
+//const deliveryRoutes = require('./routes/deliveryRoutes');
 require('dotenv').config();
 const cors = require('cors');
 
@@ -36,9 +36,9 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
-// Routes
-app.use('/api/drivers', driverRoutes);
-app.use('/api/deliveries', deliveryRoutes);
+/// Routes 
+// app.use('/api/drivers', driverRoutes);
+// app.use('/api/deliveries', deliveryRoutes);
 
 // WebSocket events (Handle your Socket.io logic here)
 setupSocket(io);
