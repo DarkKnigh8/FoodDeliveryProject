@@ -24,13 +24,13 @@ const Header = () => {
       console.log("Search query is empty");
       return;
     }
-  
+
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No token found");
       return;
     }
-  
+
     try {
       const results = await searchRestaurants(query, token);
       console.log("Search results:", results);
@@ -42,15 +42,15 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-gradient-to-r from-green-300 to-blue-500 py-6 w-full fixed top-0 left-0 z-50">
+      <header className="bg-gradient-to-r from-gray-800 to-black py-6 w-full fixed top-0 left-0 z-50">
         <div className="container mx-auto flex justify-between items-center px-6 md:px-12">
           {/* Logo */}
-          <div className="text-white font-bold text-xl">
+          <div className="text-[#FFFFFF] font-bold text-xl">
             LOGO
           </div>
 
           {/* Navbar (Links) */}
-          <nav className="hidden md:flex space-x-6 text-white text-lg">
+          <nav className="hidden md:flex space-x-6 text-[#FFFFFF] text-lg">
             <Link to="/home" className="hover:text-gray-200">Home</Link>
             <a href="#" className="hover:text-gray-200">Services</a>
             <a href="#" className="hover:text-gray-200">Blog</a>
@@ -77,11 +77,11 @@ const Header = () => {
 
           {/* Right Side - Icons and Dropdown */}
           <div className="flex items-center space-x-4">
-            <button className="text-white hover:text-gray-200">
+            <button className="text-[#FFFFFF] hover:text-gray-200">
               <i className="fas fa-bell"></i>
             </button>
             <button
-              className="text-white hover:text-gray-200"
+              className="text-[#FFFFFF] hover:text-gray-200"
               onClick={handleCartClick}
             >
               <i className="fas fa-cart-plus"></i>
@@ -89,7 +89,7 @@ const Header = () => {
 
             <div className="relative">
               <button
-                className="text-white hover:text-gray-200"
+                className="text-[#FFFFFF] hover:text-gray-200"
                 onClick={toggleDropdown}
               >
                 <i className="fas fa-user"></i>
@@ -121,7 +121,7 @@ const Header = () => {
 
           {/* Mobile Menu Icon */}
           <div className="md:hidden">
-            <button onClick={toggleDropdown} className="text-white">
+            <button onClick={toggleDropdown} className="text-[#40fc41]">
               <i className="fas fa-bars"></i>
             </button>
           </div>
@@ -131,11 +131,11 @@ const Header = () => {
       {/* Search Results Display */}
       {searchResults && (
         <div className="mt-24 px-6">
-          <h2 className="text-xl font-bold mb-2">Restaurants Matching Name:</h2>
+          <h2 className="text-xl font-bold mb-2 text-[#40fc41]">Restaurants Matching Name:</h2>
           {searchResults.restaurantsByName.length > 0 ? (
             searchResults.restaurantsByName.map((res) => (
               <div key={res._id} className="border p-2 mt-2 rounded">
-                <h3 className="font-semibold">{res.name}</h3>
+                <h3 className="font-semibold text-[#40fc41]">{res.name}</h3>
                 <p>{res.location}</p>
               </div>
             ))
@@ -143,14 +143,14 @@ const Header = () => {
             <p>No restaurants found by name.</p>
           )}
 
-          <h2 className="text-xl font-bold mt-4">Restaurants with Matching Menu Items:</h2>
+          <h2 className="text-xl font-bold mt-4 text-[#40fc41]">Restaurants with Matching Menu Items:</h2>
           {searchResults.restaurantsByMenuItem
             .filter(menuRes => !searchResults.restaurantsByName.some(nameRes => nameRes._id === menuRes._id))
             .map((res) => (
               <div key={res._id} className="border p-2 mt-2 rounded">
-                <h3 className="font-semibold">{res.name}</h3>
+                <h3 className="font-semibold text-[#40fc41]">{res.name}</h3>
                 <p>{res.location}</p>
-                <p className="italic">
+                <p className="italic text-[#40fc41]">
                   Menu Match: {res.menu.find((item) => item.name.toLowerCase().includes(query.toLowerCase()))?.name}
                 </p>
               </div>

@@ -62,7 +62,7 @@ export default function CreateOrder() {
       <h2 className="text-3xl font-semibold text-gray-800 mb-6">Your Cart</h2>
 
       {/* 🏪 Restaurant Info Card */}
-      <div className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 p-6 rounded-lg shadow-md text-white mb-10">
+      <div className="bg-gradient-to-r from-gray-800 to-black p-6 rounded-lg shadow-md text-white mb-10">
         <h2 className="text-4xl font-semibold">{restaurantName}</h2>
         <p className="mt-2">📍 {restaurantLocation}</p>
         <p className="text-sm mt-1">🕓 Estimated Time: 25-35 mins</p>
