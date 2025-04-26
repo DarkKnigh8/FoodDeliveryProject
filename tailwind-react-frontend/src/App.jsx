@@ -16,7 +16,7 @@ import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
 import Checkout from './pages/Checkout';
 import TrackOrder from './pages/TrackOrder';
-import DeliveryTracker from './pages/DeliveryTracker'; // Assuming it's implemented
+// import DeliveryTracker from './pages/DeliveryTracker'; // Assuming it's implemented
 
 function App() {
   return (
@@ -78,7 +78,7 @@ function App() {
             <Route path="/payment-success" element={<PaymentSuccess />} />
 
             {/* Delivery Tracking */}
-            <Route path="/delivery-status/:deliveryId" element={<DeliveryTracker />} />
+            {/* <Route path="/delivery-status/:deliveryId" element={<DeliveryTracker />} /> */}
           </Routes>
         </main>
         <Footer />

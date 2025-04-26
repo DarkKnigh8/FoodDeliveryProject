@@ -1,9 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { confirmCheckout, fetchOrderDetails } from '../services/api';
-//import jwt_decode from 'jwt-decode';  // Correct import for jwt-decode
-
-
+import { jwtDecode as jwt_decode } from 'jwt-decode'; // Correct import
+// import jwt_decode from 'jwt-decode'; // Default import
 
 // Function to extract user ID from JWT token
 const getUserIdFromToken = async () => {
@@ -15,10 +14,6 @@ const getUserIdFromToken = async () => {
   }
   return null;  // Return null if no token is found
 };
-
-
-
-
 export default function Checkout() {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -30,14 +25,13 @@ export default function Checkout() {
   const [orderPrice, setOrderPrice] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [confirmedDeliveryId, setConfirmedDeliveryId] = useState(null);
-  const [deliveryConfirmed, setDeliveryConfirmed] = useState(false); // Track delivery confirmation status
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track the state for submitting
+  const [deliveryConfirmed, setDeliveryConfirmed] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch order price
   useEffect(() => {
     const loadOrder = async () => {
       if (!orderId) return;
-      const res = await fetchOrderDetails(orderId); // Fetch totalPrice
+      const res = await fetchOrderDetails(orderId);
       if (res && res.totalPrice) {
         setOrderPrice(res.totalPrice);
       }
@@ -45,14 +39,13 @@ export default function Checkout() {
     loadOrder();
   }, [orderId]);
 
-  // Update delivery charge based on city
   useEffect(() => {
     if (city.toLowerCase() === 'kandy') {
       setDeliveryCharge(200);
     } else if (city.toLowerCase() === 'colombo') {
       setDeliveryCharge(500);
     } else {
-      setDeliveryCharge(0); // default
+      setDeliveryCharge(0);
     }
   }, [city]);
 
@@ -64,38 +57,33 @@ export default function Checkout() {
       return;
     }
 
-    setIsSubmitting(true); // Start submitting
+    setIsSubmitting(true);
 
     const res = await confirmCheckout({ orderId, address, phone, paymentMethod });
 
-    setIsSubmitting(false); // Stop submitting
+    setIsSubmitting(false);
 
     if (res._id) {
-      setConfirmedDeliveryId(res._id); // Save delivery ID for tracking
-      setDeliveryConfirmed(true); // Set delivery as confirmed
+      setConfirmedDeliveryId(res._id);
+      setDeliveryConfirmed(true);
       alert('✅ Delivery confirmed!');
     } else {
       alert('❌ Failed: ' + (res.message || 'Unknown error'));
     }
   };
 
-<<<<<<< HEAD
-=======
-  const handleTrackOrder = () => {
-    if (confirmedDeliveryId) {
-      navigate(`/delivery-status/${confirmedDeliveryId}`);
-    }
-  };
+  // Track Order functionality
+  // const handleTrackOrder = () => {
+  //   if (confirmedDeliveryId) {
+  //     navigate(`/delivery-status/${confirmedDeliveryId}`);
+  //   }
+  // };
 
-
-  
-
-
-  // Placeholder function for the "Pay Now" button (you can later link it to your payment service)
+  // Pay Now functionality
   const handlePayNow = async () => {
     const userId = getUserIdFromToken(); // Fetch user ID from JWT token
     if (!userId) {
-      alert('Please log in first.');  // If no user ID is found, ask user to log in
+      alert('Please log in first.');
       return;
     }
   
@@ -110,13 +98,12 @@ export default function Checkout() {
       amount: totalAmount,  // Total amount
     };
   
-    // Send the payment data to the payment service to create a payment session
     const response = await fetch("http://localhost:5004/api/payments/test-checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(paymentData),  // Send the data to the backend
+      body: JSON.stringify(paymentData),
     });
   
     const data = await response.json();
@@ -127,12 +114,7 @@ export default function Checkout() {
       alert('Payment initiation failed. Please try again later.');
     }
   };
-  
-  
-  
-  
 
->>>>>>> e38de91377ee84249d7a00651abc5597957b9cd0
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-32">
       <h1 className="text-2xl font-bold text-gray-800 mb-4">Checkout for Order #{orderId}</h1>
@@ -183,7 +165,7 @@ export default function Checkout() {
       {!deliveryConfirmed ? (
         <button
           onClick={handleSubmit}
-          disabled={isSubmitting} // Disabled when submitting
+          disabled={isSubmitting}
           className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none hover:bg-blue-700"
         >
           {isSubmitting ? 'Confirming...' : 'Confirm Delivery'}
@@ -194,13 +176,14 @@ export default function Checkout() {
             Delivery confirmed!
           </p>
           <button
+            // onClick={handleTrackOrder}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
           >
             Track Your Order
           </button>
           {/* Pay Now Button */}
           <button
-            onClick={() => alert('Redirecting to payment service...')}
+            onClick={handlePayNow}
             className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg"
           >
             Pay Now

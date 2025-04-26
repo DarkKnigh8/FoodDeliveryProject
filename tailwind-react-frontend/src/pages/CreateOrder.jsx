@@ -14,6 +14,7 @@ export default function CreateOrder() {
   const [quantities, setQuantities] = useState({});
   const [loading, setLoading] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState(null);
+  const [orderConfirmed, setOrderConfirmed] = useState(false); // Track order confirmation status
 
   const handleQuantityChange = (item, qty) => {
     setQuantities((prev) => ({ ...prev, [item.name]: qty }));
@@ -36,6 +37,7 @@ export default function CreateOrder() {
 
     if (res._id) {
       setConfirmedOrderId(res._id); // Store real orderId here
+      setOrderConfirmed(true); // Set order as confirmed
       alert('✅ Order confirmed! You can now proceed to checkout.');
     } else {
       alert('❌ Failed to confirm order: ' + (res.error || 'Unknown error'));
@@ -96,23 +98,25 @@ export default function CreateOrder() {
             <p>Total: LKR {total}</p>
           </div>
 
-          {/* 🚀 Dual Action Buttons */}
+          {/* 🚀 Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={handleConfirmOrder}
-              disabled={loading}
-              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
-            >
-              {loading ? 'Confirming...' : 'Confirm Order'}
-            </button>
-
-            <button
-              onClick={handleGoToCheckout}
-              disabled={!confirmedOrderId}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
-            >
-              Go to Checkout
-            </button>
+            {/* Show Confirm Order Button only */}
+            {!orderConfirmed ? (
+              <button
+                onClick={handleConfirmOrder}
+                disabled={loading}
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
+              >
+                {loading ? 'Confirming...' : 'Confirm Order'}
+              </button>
+            ) : (
+              <button
+                onClick={handleGoToCheckout}
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
+              >
+                Go to Checkout
+              </button>
+            )}
           </div>
         </div>
       )}

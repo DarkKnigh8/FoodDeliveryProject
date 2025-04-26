@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { searchRestaurants } from "../services/api"; // Import the search API function
 
@@ -16,7 +16,7 @@ const Header = () => {
   };
 
   const handleCartClick = () => {
-    navigate("/createorder");
+    navigate("/");
   };
 
   const handleSearch = async () => {
@@ -39,15 +39,18 @@ const Header = () => {
       console.error("Error during search:", error);
     }
   };
-  
 
   return (
     <>
-      <header className="bg-gradient-to-r from-green-300 to-blue-500 py-10 w-full fixed top-0 left-0 z-50">
-        <div className="container mx-auto flex justify-between items-center px-6">
-          <div className="text-white font-bold text-xl">LOGO</div>
+      <header className="bg-gradient-to-r from-green-300 to-blue-500 py-6 w-full fixed top-0 left-0 z-50">
+        <div className="container mx-auto flex justify-between items-center px-6 md:px-12">
+          {/* Logo */}
+          <div className="text-white font-bold text-xl">
+            LOGO
+          </div>
 
-          <nav className="space-x-6 text-white text-lg">
+          {/* Navbar (Links) */}
+          <nav className="hidden md:flex space-x-6 text-white text-lg">
             <Link to="/home" className="hover:text-gray-200">Home</Link>
             <a href="#" className="hover:text-gray-200">Services</a>
             <a href="#" className="hover:text-gray-200">Blog</a>
@@ -55,6 +58,7 @@ const Header = () => {
             <a href="#" className="hover:text-gray-200">About</a>
           </nav>
 
+          {/* Search Bar */}
           <div className="relative flex items-center">
             <input
               type="text"
@@ -71,6 +75,7 @@ const Header = () => {
             </button>
           </div>
 
+          {/* Right Side - Icons and Dropdown */}
           <div className="flex items-center space-x-4">
             <button className="text-white hover:text-gray-200">
               <i className="fas fa-bell"></i>
@@ -113,40 +118,45 @@ const Header = () => {
               )}
             </div>
           </div>
+
+          {/* Mobile Menu Icon */}
+          <div className="md:hidden">
+            <button onClick={toggleDropdown} className="text-white">
+              <i className="fas fa-bars"></i>
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Search Results Display */}
       {searchResults && (
-  <div className="mt-40 px-6">
-    <h2 className="text-xl font-bold mb-2">Restaurants Matching Name:</h2>
-    {searchResults.restaurantsByName.length > 0 ? (
-      searchResults.restaurantsByName.map((res) => (
-        <div key={res._id} className="border p-2 mt-2 rounded">
-          <h3 className="font-semibold">{res.name}</h3>
-          <p>{res.location}</p>
-        </div>
-      ))
-    ) : (
-      <p>No restaurants found by name.</p>
-    )}
+        <div className="mt-24 px-6">
+          <h2 className="text-xl font-bold mb-2">Restaurants Matching Name:</h2>
+          {searchResults.restaurantsByName.length > 0 ? (
+            searchResults.restaurantsByName.map((res) => (
+              <div key={res._id} className="border p-2 mt-2 rounded">
+                <h3 className="font-semibold">{res.name}</h3>
+                <p>{res.location}</p>
+              </div>
+            ))
+          ) : (
+            <p>No restaurants found by name.</p>
+          )}
 
-    <h2 className="text-xl font-bold mt-4">Restaurants with Matching Menu Items:</h2>
-    {searchResults.restaurantsByMenuItem
-      // Filter out restaurants already shown in the name match
-      .filter(menuRes => !searchResults.restaurantsByName.some(nameRes => nameRes._id === menuRes._id))
-      .map((res) => (
-        <div key={res._id} className="border p-2 mt-2 rounded">
-          <h3 className="font-semibold">{res.name}</h3>
-          <p>{res.location}</p>
-          <p className="italic">
-            Menu Match: {res.menu.find((item) => item.name.toLowerCase().includes(query.toLowerCase()))?.name}
-          </p>
+          <h2 className="text-xl font-bold mt-4">Restaurants with Matching Menu Items:</h2>
+          {searchResults.restaurantsByMenuItem
+            .filter(menuRes => !searchResults.restaurantsByName.some(nameRes => nameRes._id === menuRes._id))
+            .map((res) => (
+              <div key={res._id} className="border p-2 mt-2 rounded">
+                <h3 className="font-semibold">{res.name}</h3>
+                <p>{res.location}</p>
+                <p className="italic">
+                  Menu Match: {res.menu.find((item) => item.name.toLowerCase().includes(query.toLowerCase()))?.name}
+                </p>
+              </div>
+            ))}
         </div>
-      ))}
-  </div>
-)}
-
+      )}
     </>
   );
 };
