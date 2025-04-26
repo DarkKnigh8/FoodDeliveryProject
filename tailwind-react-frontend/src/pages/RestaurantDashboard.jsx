@@ -73,7 +73,7 @@ export default function RestaurantDashboard() {
           resetForm();
           setShowModal(true);
         }}
-        className="bg-blue-600 text-white px-4 py-2 rounded mb-6"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mb-6"
       >
         + Add Restaurant
       </button>
@@ -103,7 +103,7 @@ export default function RestaurantDashboard() {
                 className="w-full border px-3 py-2 rounded"
               />
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={resetForm} className="px-4 py-2 border rounded">
+                <button type="button" onClick={resetForm} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 border rounded">
                   Cancel
                 </button>
                 <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">
@@ -125,13 +125,13 @@ export default function RestaurantDashboard() {
                 <p className="mt-1">
                   Status:{' '}
                   <span className={r.isAvailable ? 'text-green-600' : 'text-red-600'}>
-                    {r.isAvailable ? 'Open ✅' : 'Closed ❌'}
+                    {r.isAvailable ? 'Open ' : 'Closed '}
                   </span>
                 </p>
                 <p className="mt-1">
                   Verification:{' '}
                   <span className={r.isVerified ? 'text-green-600' : 'text-red-600'}>
-                    {r.isVerified ? 'Verified ✅' : 'Unverified ❌'}
+                    {r.isVerified ? 'Verified ' : 'Unverified '}
                   </span>
                 </p>
 
@@ -146,24 +146,24 @@ export default function RestaurantDashboard() {
               <div className="space-y-2 text-right">
                 <button
                   onClick={() => toggleRestaurantAvailability(r._id, !r.isAvailable)}
-                  className="px-3 py-1 bg-yellow-500 text-white rounded"
+                  className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
                 >
                   Set {r.isAvailable ? 'Closed' : 'Open'}
                 </button>
                 <div className="flex flex-wrap gap-2 mt-4">
                 
-                <button onClick={() => handleEdit(r)} className="px-3 py-1 bg-blue-500 text-white rounded">
+                <button onClick={() => handleEdit(r)} className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded">
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(r._id)}
-                  className="px-3 py-1 bg-red-600 text-white rounded"
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded"
                 >
                   Delete
                 </button>
                 <button
                   onClick={() => navigate(`/restaurants/${r._id}/orders`)}
-                  className="px-3 py-1 bg-purple-600 text-white rounded"
+                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded"
                 >
                   Manage Orders
                 </button>

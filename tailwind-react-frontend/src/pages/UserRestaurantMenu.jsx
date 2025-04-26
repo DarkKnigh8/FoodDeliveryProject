@@ -47,7 +47,7 @@ export default function UserRestaurantMenu() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10 mt-20">
       <div className="max-w-5xl mx-auto">
-        <Link to="/home" className="text-blue-600 hover:underline text-sm mb-6 inline-block">
+        <Link to="/home" className="text-black-600 hover:underline text-sm mb-6 inline-block">
           ← Back to Restaurants
         </Link>
 
@@ -86,7 +86,7 @@ export default function UserRestaurantMenu() {
                       item.available ? 'text-green-600' : 'text-red-500'
                     }`}
                   >
-                    {item.available ? 'Available ✅' : 'Unavailable ❌'}
+                    {item.available ? 'Available ' : 'Unavailable '}
                   </p>
 
                   {/* Add or Remove from Cart Buttons */}

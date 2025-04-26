@@ -16,6 +16,7 @@ import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
 import Checkout from './pages/Checkout';
 import TrackOrder from './pages/TrackOrder';
+import AdminTransactions from './pages/AdminTransactions';
 // import DeliveryTracker from './pages/DeliveryTracker'; // Uncomment only if file exists
 
 function App() {
@@ -31,7 +32,7 @@ function App() {
             <Route
               path="/home"
               element={
-                <ProtectedRoute allowedRoles={['customer']}>
+                <ProtectedRoute allowedRoles={['customer','delivery']}>
                   <Home />
                 </ProtectedRoute>
               }
@@ -39,6 +40,7 @@ function App() {
             <Route path="/restaurantDashboard" element={<RestaurantDashboard />} />
             <Route path="/restaurants/:id" element={<UserRestaurantMenu />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
+            <Route path="/admin/transactions" element={<AdminTransactions />} />
             <Route path="/resReg" element={<AdminResRegistration />} />
             <Route path="/restaurants/:restaurantId/orders" element={<ManageOrders />} />
             <Route

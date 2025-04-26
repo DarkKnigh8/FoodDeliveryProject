@@ -1,18 +1,19 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { confirmCheckout, fetchOrderDetails } from '../services/api';
+import { jwtDecode as jwt_decode } from 'jwt-decode'; // Correct import
+// import jwt_decode from 'jwt-decode'; // Default import
 
 // Function to extract user ID from JWT token
 const getUserIdFromToken = async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');  // Retrieve token from localStorage
   if (token) {
-    const { default: jwt_decode } = await import('jwt-decode');
-    const decoded = jwt_decode(token);
-    return decoded.userId;
+    const { default: jwt_decode } = await import('jwt-decode');  // Dynamically import jwt-decode
+    const decoded = jwt_decode(token);  // Decode the token to get the payload
+    return decoded.userId;  // Extract userId from decoded token
   }
-  return null;
+  return null;  // Return null if no token is found
 };
-
 export default function Checkout() {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -24,10 +25,9 @@ export default function Checkout() {
   const [orderPrice, setOrderPrice] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [confirmedDeliveryId, setConfirmedDeliveryId] = useState(null);
-  const [deliveryConfirmed, setDeliveryConfirmed] = useState(false);
+  const [deliveryConfirmed, setDeliveryConfirmed] = useState(false); 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch order price
   useEffect(() => {
     const loadOrder = async () => {
       if (!orderId) return;
@@ -39,7 +39,6 @@ export default function Checkout() {
     loadOrder();
   }, [orderId]);
 
-  // Update delivery charge based on city
   useEffect(() => {
     if (city.toLowerCase() === 'kandy') {
       setDeliveryCharge(200);
@@ -73,30 +72,32 @@ export default function Checkout() {
     }
   };
 
-  const handleTrackOrder = () => {
-    if (confirmedDeliveryId) {
-      navigate(`/delivery-status/${confirmedDeliveryId}`);
-    }
-  };
+  // Track Order functionality
+  // const handleTrackOrder = () => {
+  //   if (confirmedDeliveryId) {
+  //     navigate(`/delivery-status/${confirmedDeliveryId}`);
+  //   }
+  // };
 
+  // Pay Now functionality
   const handlePayNow = async () => {
-    const userId = await getUserIdFromToken();
+    const userId = getUserIdFromToken(); // Fetch user ID from JWT token
     if (!userId) {
       alert('Please log in first.');
       return;
     }
-
+  
     if (!orderId || !totalAmount) {
       alert('Order details are missing. Please confirm your order.');
       return;
     }
-
+  
     const paymentData = {
-      orderId,
-      userId,
-      amount: totalAmount,
+      orderId,  // Order ID
+      userId,   // User ID from JWT token
+      amount: totalAmount,  // Total amount
     };
-
+  
     const response = await fetch("http://localhost:5004/api/payments/test-checkout", {
       method: "POST",
       headers: {
@@ -104,11 +105,11 @@ export default function Checkout() {
       },
       body: JSON.stringify(paymentData),
     });
-
+  
     const data = await response.json();
-
+  
     if (data.url) {
-      window.location.href = data.url;
+      window.location.href = data.url;  // Redirect to Stripe Checkout page
     } else {
       alert('Payment initiation failed. Please try again later.');
     }
@@ -151,6 +152,7 @@ export default function Checkout() {
         </select>
       </div>
 
+      {/* 💰 Price Summary */}
       <div className="bg-gray-100 p-6 rounded-lg mb-6 shadow-md">
         <p className="text-sm text-gray-600">🛒 Order Price: <strong>LKR {orderPrice}</strong></p>
         <p className="text-sm text-gray-600">🚚 Delivery Charge: <strong>LKR {deliveryCharge}</strong></p>
@@ -159,6 +161,7 @@ export default function Checkout() {
         </p>
       </div>
 
+      {/* 🔘 Action Buttons */}
       {!deliveryConfirmed ? (
         <button
           onClick={handleSubmit}
@@ -173,11 +176,12 @@ export default function Checkout() {
             Delivery confirmed!
           </p>
           <button
-            onClick={handleTrackOrder}
+            // onClick={handleTrackOrder}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
           >
             Track Your Order
           </button>
+          {/* Pay Now Button */}
           <button
             onClick={handlePayNow}
             className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg"

@@ -78,12 +78,12 @@ export default function MenuManager({ restaurantId }) {
   };
 
   return (
-    <div className="mt-8">
+    <div className=" min-h-screen bg-gradient-to-r from-blue-50 via-white to-blue-50 px-6 py-12">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold">Menu Manager</h3>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded hover:bg-blue-700"
         >
           + Add Menu Item
         </button>
@@ -131,13 +131,13 @@ export default function MenuManager({ restaurantId }) {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-gray-300 text-black px-3 py-1 rounded hover:bg-gray-400"
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded hover:"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded hover:"
                 >
                   {form._id ? 'Update' : 'Add'}
                 </button>
@@ -163,18 +163,18 @@ export default function MenuManager({ restaurantId }) {
               />
             )}
             <p className={`mt-1 font-semibold ${item.available ? 'text-green-600' : 'text-red-600'}`}>
-              {item.available ? 'Available 🟢' : 'Unavailable 🔴'}
+              {item.available ? 'Available ' : 'Unavailable '}
             </p>
             <div className="flex gap-2 mt-3">
               <button
                 onClick={() => toggleAvailability(item._id, item.available)}
-                className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded hover:"
               >
                 Set {item.available ? 'Unavailable' : 'Available'}
               </button>
               <button
                 onClick={() => handleEdit(item)}
-                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700  text-white px-3 py-1 rounded hover:bg-blue-700"
               >
                 Edit
               </button>
