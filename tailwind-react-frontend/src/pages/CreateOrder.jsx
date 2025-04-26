@@ -35,7 +35,7 @@ export default function CreateOrder() {
     setLoading(false);
 
     if (res._id) {
-      setConfirmedOrderId(res._id); // ✅ Store real orderId here
+      setConfirmedOrderId(res._id); // Store real orderId here
       alert('✅ Order confirmed! You can now proceed to checkout.');
     } else {
       alert('❌ Failed to confirm order: ' + (res.error || 'Unknown error'));
@@ -47,7 +47,7 @@ export default function CreateOrder() {
       alert('⚠️ Please confirm your order first.');
       return;
     }
-    navigate('/checkout', { state: { orderId: confirmedOrderId } }); // ✅ Pass the confirmed orderId
+    navigate('/checkout', { state: { orderId: confirmedOrderId } }); // Pass the confirmed orderId
   };
 
   if (!restaurantId || menu.length === 0) {
@@ -55,17 +55,20 @@ export default function CreateOrder() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 my-20">
+    <div className="max-w-7xl mx-auto p-6 mt-24 space-y-8">
+      {/* 🍕 Your Cart Title */}
+      <h2 className="text-3xl font-semibold text-gray-800 mb-6">Your Cart</h2>
+
       {/* 🏪 Restaurant Info Card */}
-      <div className="bg-white p-4 rounded shadow mb-6">
-        <h2 className="text-2xl font-bold">{restaurantName}</h2>
-        <p className="text-gray-500 mb-1">📍 {restaurantLocation}</p>
-        <p className="text-sm text-green-600">🕓 Estimated Time: 25-35 mins</p>
+      <div className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 p-6 rounded-lg shadow-md text-white mb-10">
+        <h2 className="text-4xl font-semibold">{restaurantName}</h2>
+        <p className="mt-2">📍 {restaurantLocation}</p>
+        <p className="text-sm mt-1">🕓 Estimated Time: 25-35 mins</p>
       </div>
 
       {/* 🍕 Menu Section */}
-      <h2 className="text-xl font-semibold mb-3">Cart Items</h2>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Cart Items</h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-10">
         {menu.map((item, idx) => (
           <MenuCard
             key={idx}
@@ -78,19 +81,19 @@ export default function CreateOrder() {
 
       {/* 🛒 Live Selection List */}
       {selectedItems.length > 0 && (
-        <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-2">Selected Items</h2>
-          <ul className="text-sm border p-4 rounded shadow bg-white mb-4 space-y-2">
+        <div className="bg-white p-6 rounded-lg shadow-md mt-8">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Selected Items</h3>
+          <ul className="text-sm space-y-2 mb-6">
             {selectedItems.map((item, idx) => (
-              <li key={idx} className="flex justify-between">
+              <li key={idx} className="flex justify-between text-gray-700">
                 <span>{item.name} × {item.quantity}</span>
                 <span>LKR {item.quantity * item.price}</span>
               </li>
             ))}
           </ul>
 
-          <div className="text-right text-lg font-bold text-blue-700 mb-4">
-            Total: LKR {total}
+          <div className="text-right text-lg font-bold text-blue-700 mb-6">
+            <p>Total: LKR {total}</p>
           </div>
 
           {/* 🚀 Dual Action Buttons */}
@@ -98,7 +101,7 @@ export default function CreateOrder() {
             <button
               onClick={handleConfirmOrder}
               disabled={loading}
-              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-3 rounded text-base"
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
             >
               {loading ? 'Confirming...' : 'Confirm Order'}
             </button>
@@ -106,7 +109,7 @@ export default function CreateOrder() {
             <button
               onClick={handleGoToCheckout}
               disabled={!confirmedOrderId}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-3 rounded text-base"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
             >
               Go to Checkout
             </button>

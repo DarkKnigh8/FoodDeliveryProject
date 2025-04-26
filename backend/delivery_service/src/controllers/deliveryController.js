@@ -1,15 +1,5 @@
 const axios = require('axios');
 const Delivery = require('../models/Delivery');
-const Driver = require('../models/Driver');
-
-// Helper: Auto-assign an available driver
-const assignAvailableDriver = async () => {
-  const driver = await Driver.findOne({ available: true });
-  if (!driver) return null;
-  driver.available = false;
-  await driver.save();
-  return driver._id;
-};
 
 // Confirm Checkout Controller
 exports.confirmCheckout = async (req, res) => {
@@ -44,30 +34,21 @@ exports.confirmCheckout = async (req, res) => {
       return res.status(404).json({ message: 'Order not found from order service' });
     }
 
-    // Assign available driver
-    try {
-      const assignedDriverId = await assignAvailableDriver();
-      console.log('🚚 Assigned Driver ID:', assignedDriverId);
+    // Create and save new delivery without driver assignment
+    const newDelivery = new Delivery({
+      orderId,
+      customerId: order.customerId,
+      address,
+      phone,
+      paymentMethod,
+      status: 'Pending', // No need for 'Assigned' status anymore
+      assignedDriver: null, // No driver assignment here
+    });
 
-      // Create and save new delivery
-      const newDelivery = new Delivery({
-        orderId,
-        customerId: order.customerId,
-        address,
-        phone,
-        paymentMethod,
-        status: assignedDriverId ? 'Assigned' : 'Pending',
-        assignedDriver: assignedDriverId || null
-      });
+    const savedDelivery = await newDelivery.save();
+    console.log('✅ Delivery Saved:', savedDelivery);
 
-      const savedDelivery = await newDelivery.save();
-      console.log('✅ Delivery Saved:', savedDelivery);
-
-      return res.status(201).json(savedDelivery);
-    } catch (driverOrSaveError) {
-      console.error('❌ Driver Assignment or Save Failed:', driverOrSaveError.message);
-      return res.status(500).json({ message: 'Driver assignment or save failed' });
-    }
+    return res.status(201).json(savedDelivery);
 
   } catch (error) {
     console.error('❌ Unhandled Confirm Checkout Error:', error.message);

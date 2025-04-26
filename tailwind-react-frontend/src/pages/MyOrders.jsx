@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchMyOrders, updateOrderStatus, deleteOrder } from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import EditOrderModal from '../components/EditOrderModal'; // Ensure correct path
+import EditOrderModal from '../components/EditOrderModal';
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -43,16 +43,8 @@ export default function MyOrders() {
     loadOrders();
   };
 
-  const handleTrack = (orderId) => {
-    navigate(`/track/${orderId}`);
-  };
-
-  const handleSetDelivery = (orderId) => {
-    alert(`Set delivery for order ${orderId}`);
-  };
-
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 mt-24"> {/* Add mt-24 to create space below the header */}
       <h1 className="text-3xl font-bold mb-6">My Orders</h1>
 
       {editingOrder && (
@@ -102,24 +94,6 @@ export default function MyOrders() {
                   className="px-4 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded"
                 >
                   Cancel Order
-                </button>
-              )}
-
-              {order.status !== 'Cancelled' && order.status !== 'Delivered' && (
-                <button
-                  onClick={() => handleTrack(order._id)}
-                  className="px-4 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
-                >
-                  Track Order
-                </button>
-              )}
-
-              {(order.status === 'Pending' || order.status === 'Confirmed') && (
-                <button
-                  onClick={() => handleSetDelivery(order._id)}
-                  className="px-4 py-1 text-sm bg-green-600 hover:bg-green-700 text-white rounded"
-                >
-                  Set Delivery
                 </button>
               )}
 
