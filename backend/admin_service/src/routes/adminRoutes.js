@@ -9,6 +9,11 @@ const {
   authenticate,
   requireRole
 } = require('../middlewares/adminMiddleware');
+const {
+  getAllTransactions,
+  getFilteredTransactions
+} = require('../controllers/adminPaymentController');
+
 
 const router = express.Router();
 
@@ -18,6 +23,10 @@ router.delete('/user/:userId', authenticate, requireRole('admin'), deleteUser);
 router.put('/verify-restaurant/:id', authenticate, requireRole('admin'), verifyRestaurant);
 
 router.get('/restaurants', authenticate, requireRole('admin'), getAllRestaurants);
+
+// Payment management routes
+router.get('/payments/transactions', authenticate, requireRole('admin'), getAllTransactions);
+router.get('/payments/transactions/filter', authenticate, requireRole('admin'), getFilteredTransactions);
 
 
 module.exports = router;

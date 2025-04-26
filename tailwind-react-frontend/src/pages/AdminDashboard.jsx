@@ -1,21 +1,31 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ import
+import { useNavigate } from 'react-router-dom';
 
 export default function RoleButtons() {
-  const navigate = useNavigate(); // ✅ initialize navigate
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard Role</h1>
-      <div className="flex gap-4">
-        <button className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gray-100 px-4 pt-20">
+      <h1 className="text-3xl font-bold mb-10 text-center">Admin Dashboard Role</h1>
+
+        <div className="flex flex-col gap-6 w-full max-w-xs">
+        <button
+          onClick={() => navigate('/delivery')}
+          className="w-full px-6 py-4 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+        >
           Delivery
         </button>
         <button
-          onClick={() => navigate('/resReg')} // ✅ now this works
-          className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+          onClick={() => navigate('/resReg')}
+          className="w-full px-6 py-4 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
         >
           Restaurant Registration
+        </button>
+        <button
+          onClick={() => navigate('/admin/transactions')}
+          className="w-full px-6 py-4 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+        >
+          Financial Transactions
         </button>
       </div>
     </div>

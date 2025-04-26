@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LandDes from './components/LandDes';  // Import the LandDes component here
+import LandDes from './components/LandDes';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -16,7 +16,12 @@ import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
 import Checkout from './pages/Checkout';
 import TrackOrder from './pages/TrackOrder';
+<<<<<<< HEAD
 // import DeliveryTracker from './pages/DeliveryTracker'; // Assuming it's implemented
+=======
+import AdminTransactions from './pages/AdminTransactions';
+// import DeliveryTracker from './pages/DeliveryTracker'; // Uncomment only if file exists
+>>>>>>> 334057a18de5675463edb2499851cfd924699f55
 
 function App() {
   return (
@@ -36,7 +41,7 @@ function App() {
             <Route
               path="/home"
               element={
-                <ProtectedRoute allowedRoles={['customer']}>
+                <ProtectedRoute allowedRoles={['customer','delivery']}>
                   <Home />
                 </ProtectedRoute>
               }
@@ -44,6 +49,7 @@ function App() {
             <Route path="/restaurantDashboard" element={<RestaurantDashboard />} />
             <Route path="/restaurants/:id" element={<UserRestaurantMenu />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
+            <Route path="/admin/transactions" element={<AdminTransactions />} />
             <Route path="/resReg" element={<AdminResRegistration />} />
             <Route path="/restaurants/:restaurantId/orders" element={<ManageOrders />} />
             
@@ -75,10 +81,15 @@ function App() {
 
             {/* Checkout and Payment Routes */}
             <Route path="/checkout" element={<Checkout />} />
+<<<<<<< HEAD
             <Route path="/payment-success" element={<PaymentSuccess />} />
 
             {/* Delivery Tracking */}
             {/* <Route path="/delivery-status/:deliveryId" element={<DeliveryTracker />} /> */}
+=======
+            {/* <Route path="/delivery-status/:deliveryId" element={<DeliveryTracker />} /> */}
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+>>>>>>> 334057a18de5675463edb2499851cfd924699f55
           </Routes>
         </main>
         <Footer />

@@ -18,6 +18,7 @@ restaurantAPI.interceptors.request.use((config) => {
 });
 
 
+////serach function
 const API_BASE_URL = 'http://localhost:5000/api/restaurants'; // Adjust if different
 
 export const searchRestaurants = async (query, token) => {
@@ -177,3 +178,21 @@ export const fetchDeliveryDetails = async (deliveryId) => {
   const data = await res.json();
   return data;
 };
+
+const BASE_ADMIN_URL = 'http://localhost:5050/api/admin';
+
+export const fetchAllTransactions = async (token) => {
+  const res = await fetch(`${BASE_ADMIN_URL}/payments/transactions`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+};
+
+export const fetchFilteredTransactions = async (filters, token) => {
+  const queryParams = new URLSearchParams(filters).toString();
+  const res = await fetch(`${BASE_ADMIN_URL}/payments/transactions/filter?${queryParams}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+};
+

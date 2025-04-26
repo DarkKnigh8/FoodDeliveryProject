@@ -108,3 +108,33 @@ exports.confirmPayment = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// View All Transactions (Admin Only)
+exports.getAllTransactions = async (req, res) => {
+  try {
+    const transactions = await Payment.find({}, '_id amount currency paymentStatus stripePaymentId createdAt');
+    res.status(200).json(transactions);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching transactions', error: err.message });
+  }
+};
+
+
+// Filter Transactions by date, restaurant, or user
+exports.getFilteredTransactions = async (req, res) => {
+  const { startDate, endDate } = req.query;
+  const query = {};
+
+  if (startDate && endDate) {
+    query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+  }
+
+  try {
+    const transactions = await Payment.find(query, '_id amount currency paymentStatus stripePaymentId createdAt');
+    res.status(200).json(transactions);
+  } catch (err) {
+    res.status(500).json({ message: 'Error filtering transactions', error: err.message });
+  }
+};
+
+
