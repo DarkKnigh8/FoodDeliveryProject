@@ -42,7 +42,7 @@ export default function RestaurantOrders({ restaurantId }) {
           <li key={order._id} className="border p-2 rounded">
             <p><strong>Order ID:</strong> {order._id}</p>
             <p><strong>Status:</strong> {order.status}</p>
-            <p><strong>Total:</strong> ${order.totalPrice}</p>
+            <p><strong>Total:</strong> Rs:{order.totalPrice}</p>
             <p><strong>Items:</strong> {order.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</p>
 
             <select
