@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-// Register controller
+// ✅ Register controller
 export const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -13,19 +13,22 @@ export const register = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'Email already registered' });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ name, email, password: hashedPassword, role });
     await user.save();
 
-    res.status(201).json({ message: 'User registered', user });
+    res.status(201).json({ message: 'User registered successfully', user });
   } catch (err) {
+    console.error('[AUTH ERROR] Register:', err.message);
     res.status(400).json({ message: err.message });
   }
 };
 
-// Login controller
+// ✅ Login controller
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -44,6 +47,23 @@ export const login = async (req, res) => {
 
     res.json({ message: 'Login successful', token, user });
   } catch (err) {
+    console.error('[AUTH ERROR] Login:', err.message);
     res.status(401).json({ message: err.message });
+  }
+};
+
+// ✅ Get all Delivery Drivers (For Delivery Service to fetch)
+export const getAllDrivers = async (req, res) => {
+  try {
+    const drivers = await User.find({ role: 'delivery' });
+
+    if (!drivers.length) {
+      return res.status(404).json({ message: 'No delivery drivers found' });
+    }
+
+    res.status(200).json(drivers);
+  } catch (err) {
+    console.error('[AUTH ERROR] Get Drivers:', err.message);
+    res.status(500).json({ message: 'Failed to fetch drivers' });
   }
 };

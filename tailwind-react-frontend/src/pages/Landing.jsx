@@ -5,7 +5,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100">
+    <div className="min-h-screen flex flex-col justify-center items-center">
       <h1 className="text-3xl font-bold mb-6">Welcome to the App</h1>
       <div className="flex gap-4">
         <button

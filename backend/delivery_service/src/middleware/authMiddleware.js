@@ -14,7 +14,7 @@ export const authenticate = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // contains id, role, etc.
+    req.user = decoded; // { id, email, role }
     next();
   } catch (err) {
     res.status(401).json({ message: 'Invalid token' });
@@ -24,6 +24,14 @@ export const authenticate = (req, res, next) => {
 export const requireRole = (role) => (req, res, next) => {
   if (!req.user || req.user.role !== role) {
     return res.status(403).json({ message: 'Forbidden: Insufficient role' });
+  }
+  next();
+};
+
+// ✅ Add this missing function:
+export const allowRoles = (roles) => (req, res, next) => {
+  if (!req.user || !roles.includes(req.user.role)) {
+    return res.status(403).json({ message: 'Forbidden: Role not allowed' });
   }
   next();
 };
