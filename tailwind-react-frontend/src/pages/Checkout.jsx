@@ -1,8 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { confirmCheckout, fetchOrderDetails } from '../services/api';
-import { jwtDecode as jwt_decode } from 'jwt-decode'; // Correct import
-// import jwt_decode from 'jwt-decode'; // Default import
+import { jwtDecode as jwt_decode } from 'jwt-decode';
 
 // Function to extract user ID from JWT token
 const getUserIdFromToken = async () => {
@@ -14,10 +13,12 @@ const getUserIdFromToken = async () => {
   }
   return null;  // Return null if no token is found
 };
+
 export default function Checkout() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const orderId = state?.orderId || '';
+
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [city, setCity] = useState('');
@@ -32,7 +33,7 @@ export default function Checkout() {
     const loadOrder = async () => {
       if (!orderId) return;
       const res = await fetchOrderDetails(orderId);
-      if (res && res.totalPrice) {
+      if (res?.totalPrice) {
         setOrderPrice(res.totalPrice);
       }
     };
@@ -63,41 +64,44 @@ export default function Checkout() {
 
     setIsSubmitting(false);
 
-    if (res._id) {
-      setConfirmedDeliveryId(res._id);
-      setDeliveryConfirmed(true);
+    if (res?.delivery?._id) {
+      setConfirmedDeliveryId(res.delivery._id); // Set delivery ID
+      setDeliveryConfirmed(true); // Set flag to show "Track your order" button
       alert('✅ Delivery confirmed!');
     } else {
       alert('❌ Failed: ' + (res.message || 'Unknown error'));
     }
   };
 
-  // Track Order functionality
-  // const handleTrackOrder = () => {
-  //   if (confirmedDeliveryId) {
-  //     navigate(`/delivery-status/${confirmedDeliveryId}`);
-  //   }
-  // };
+  const handleTrackOrder = () => {
+    if (confirmedDeliveryId) {
+      navigate(`/track/${confirmedDeliveryId}`); // Redirect to /track/:deliveryId
+    } else {
+      alert('No delivery assigned yet.');
+    }
+  };
 
-  // Pay Now functionality
   const handlePayNow = async () => {
     const userId = getUserIdFromToken(); // Fetch user ID from JWT token
     if (!userId) {
       alert('Please log in first.');
       return;
     }
-  
-    if (!orderId || !totalAmount) {
-      alert('Order details are missing. Please confirm your order.');
+
+   // const payload = JSON.parse(atob(token.split('.')[1]));
+    //const userId = payload?.userId;
+
+    if (!userId || !orderId || !totalAmount) {
+      alert('Missing user or order info.');
       return;
     }
-  
+
     const paymentData = {
-      orderId,  // Order ID
-      userId,   // User ID from JWT token
-      amount: totalAmount,  // Total amount
+      orderId,
+      userId,
+      amount: totalAmount,
     };
-  
+
     const response = await fetch("http://localhost:5004/api/payments/test-checkout", {
       method: "POST",
       headers: {
@@ -105,11 +109,11 @@ export default function Checkout() {
       },
       body: JSON.stringify(paymentData),
     });
-  
+
     const data = await response.json();
-  
+
     if (data.url) {
-      window.location.href = data.url;  // Redirect to Stripe Checkout page
+      window.location.href = data.url; // Redirect to Stripe Checkout page
     } else {
       alert('Payment initiation failed. Please try again later.');
     }
@@ -152,7 +156,6 @@ export default function Checkout() {
         </select>
       </div>
 
-      {/* 💰 Price Summary */}
       <div className="bg-gray-100 p-6 rounded-lg mb-6 shadow-md">
         <p className="text-sm text-gray-600">🛒 Order Price: <strong>LKR {orderPrice}</strong></p>
         <p className="text-sm text-gray-600">🚚 Delivery Charge: <strong>LKR {deliveryCharge}</strong></p>
@@ -161,7 +164,6 @@ export default function Checkout() {
         </p>
       </div>
 
-      {/* 🔘 Action Buttons */}
       {!deliveryConfirmed ? (
         <button
           onClick={handleSubmit}
@@ -172,21 +174,18 @@ export default function Checkout() {
         </button>
       ) : (
         <div className="flex flex-col items-center space-y-4">
-          <p className="text-green-600 font-semibold">
-            Delivery confirmed!
-          </p>
+          <p className="text-green-600 font-semibold">Delivery confirmed successfully!</p>
           <button
-            // onClick={handleTrackOrder}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+            onClick={handleTrackOrder}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
           >
-            Track Your Order
+            🚚 Track Your Order
           </button>
-          {/* Pay Now Button */}
           <button
             onClick={handlePayNow}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg"
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg"
           >
-            Pay Now
+            💳 Pay Now
           </button>
         </div>
       )}

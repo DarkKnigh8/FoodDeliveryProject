@@ -17,27 +17,31 @@ restaurantAPI.interceptors.request.use((config) => {
   return config;
 });
 
-
-////serach function
-const API_BASE_URL = 'http://localhost:5000/api/restaurants'; // Adjust if different
-
-export const searchRestaurants = async (query, token) => {
+// Search function
+const API_BASE_URL = 'http://localhost:5000/api/restaurants'; 
+export const searchRestaurants = async (query) => {
   const response = await fetch(`${API_BASE_URL}/search?query=${query}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
+    headers: getAuthHeaders(),
   });
-  const data = await response.json();
-  return data;
+  return await response.json();
 };
-
-
 
 // --------------------
 // AUTH SERVICE (port 5001)
 // --------------------
 export const authAPI = axios.create({
   baseURL: 'http://localhost:5001/api/auth',
+});
+
+// --------------------
+// DELIVERY SERVICE (port 5003)
+// --------------------
+export const deliveryAPI = axios.create({
+  baseURL: 'http://localhost:5006/api',
+});
+deliveryAPI.interceptors.request.use((config) => {
+  config.headers = { ...config.headers, ...getAuthHeaders() };
+  return config;
 });
 
 // --------------------
@@ -66,6 +70,11 @@ export const updateOrderStatus = async (orderId, status) => {
   return res.data;
 };
 
+export const fetchOrderDetails = async (orderId) => {
+  const res = await orderAPI.get(`/${orderId}`);
+  return res.data;
+};
+
 // --------------------
 // ADMIN SERVICE (port 5050)
 // --------------------
@@ -90,9 +99,7 @@ export const verifyRestaurant = async (id) => {
 export const deleteOrder = async (orderId) => {
   const res = await fetch(`http://localhost:5005/api/orders/${orderId}`, {
     method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
+    headers: getAuthHeaders(),
   });
   return res.json();
 };
@@ -102,97 +109,50 @@ export const editOrder = async (orderId, updatedData) => {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(updatedData),
   });
   return res.json();
 };
 
-//delivery service eke ewa mock
-// src/services/api.js
-
-// export const confirmCheckout = async (checkoutData) => {
-//   const res = await fetch('http://localhost:5006/api/deliveries/checkout', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${localStorage.getItem('token')}`,
-//     },
-//     body: JSON.stringify(checkoutData),
-//   });
-//   return res.json();
-// };
-
-// export const fetchDeliveryDetails = async (deliveryId) => {
-//   const res = await fetch(`http://localhost:5006/api/deliveries/${deliveryId}`, {
-//     headers: {
-//       Authorization: `Bearer ${localStorage.getItem('token')}`,
-//     },
-//   });
-//   return res.json();
-// };
-
-// export const fetchOrderDetails = async (orderId) => {
-//   const res = await fetch(`http://localhost:5005/api/orders/${orderId}`, {
-//     headers: {
-//       Authorization: `Bearer ${localStorage.getItem('token')}`,
-//     },
-//   });
-//   return res.json();
-// };
-
-// src/services/api.js
-
-export const fetchOrderDetails = async (orderId) => {
-  const res = await fetch(`http://localhost:5005/api/orders/${orderId}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  });
-  const data = await res.json();
-  console.log('Fetched Order Details:', data); // ✅ Debug log
-  return data;
-};
-
+// --------------------
+// DELIVERY SERVICE EXTRAS (port 5006)
+// --------------------
 export const confirmCheckout = async (checkoutData) => {
   const res = await fetch('http://localhost:5006/api/deliveries/checkout', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(checkoutData),
   });
-  const data = await res.json();
-  console.log('Checkout Confirmation Response:', data); // ✅ Debug log
-  return data;
+  return await res.json();
 };
 
 export const fetchDeliveryDetails = async (deliveryId) => {
   const res = await fetch(`http://localhost:5006/api/deliveries/${deliveryId}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
+    headers: getAuthHeaders(),
   });
   const data = await res.json();
   return data;
 };
 
+// Admin transactions
 const BASE_ADMIN_URL = 'http://localhost:5050/api/admin';
 
-export const fetchAllTransactions = async (token) => {
+export const fetchAllTransactions = async () => {
   const res = await fetch(`${BASE_ADMIN_URL}/payments/transactions`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: getAuthHeaders(),
   });
   return res.json();
 };
 
-export const fetchFilteredTransactions = async (filters, token) => {
+export const fetchFilteredTransactions = async (filters) => {
   const queryParams = new URLSearchParams(filters).toString();
   const res = await fetch(`${BASE_ADMIN_URL}/payments/transactions/filter?${queryParams}`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: getAuthHeaders(),
   });
   return res.json();
 };
-

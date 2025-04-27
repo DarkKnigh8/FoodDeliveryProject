@@ -115,7 +115,7 @@ export default function RestaurantDashboard() {
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-6 bg-white p-4 rounded shadow-lg">
         {[...restaurants].reverse().map((r) => (
           <div key={r._id} className="p-4 border rounded shadow">
             <div className="flex justify-between items-start">

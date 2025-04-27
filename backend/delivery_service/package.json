@@ -2,6 +2,7 @@
   "name": "delivery_service",
   "version": "1.0.0",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "start": "node src/app.js"
   },
@@ -15,7 +16,9 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.13.2",
-    "socket.io": "^4.8.1"
+    "leaflet-routing-machine": "^3.2.12",
+    "mongoose": "^8.14.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   }
 }

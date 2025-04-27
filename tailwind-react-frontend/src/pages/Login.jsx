@@ -12,30 +12,30 @@ export default function Login() {
     e.preventDefault();
     try {
       const res = await authAPI.post('/login', form); // send login form
-  
+
       // Store token and user
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-  
+
       const user = res.data.user;
-  
-      // Role-based redirects
+
       if (user?.role === 'restaurant') {
         navigate('/restaurantDashboard');
       } else if (user?.role === 'admin') {
         navigate('/adminDashboard');
       } else if (user?.role === 'customer') {
-        navigate('/home'); // or '/customerDashboard' if you have one
-      }else if (user?.role === 'delivery') {
-        navigate('/home'); // or '/customerDashboard' if you have one
+        navigate('/home');
+      } else if (user?.role === 'delivery') {
+        navigate('/driver'); // Adjust as needed for delivery role
       } else {
         alert('Unknown user role');
       }
+
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }
   };
-  
+
   return (
     <div className="max-w-md mx-auto mt-12 p-6 bg-white shadow rounded">
       <h2 className="text-xl font-bold mb-4">Login</h2>
