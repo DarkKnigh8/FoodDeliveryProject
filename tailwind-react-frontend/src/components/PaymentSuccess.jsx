@@ -30,28 +30,41 @@ export default function PaymentSuccess() {
 
   // While loading payment details, show loading message
   if (loading) {
-    return <p>Loading payment details...</p>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <div className="text-lg font-semibold text-gray-700">Loading payment details...</div>
+      </div>
+    );
   }
 
   // If no payment data, show an error message
   if (!payment) {
-    return <p>Error: No payment data found!</p>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-red-50">
+        <div className="text-lg font-semibold text-red-600">Error: No payment data found!</div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Payment Successful!</h1>
-      <p>Order ID: {payment.orderId}</p>
-      <p>Amount: LKR {payment.amount}</p>
-      <p>Status: {payment.paymentStatus}</p>
+    <div className="min-h-screen bg-gradient-to-r from-blue-100 to-blue-300 py-10 px-4 flex flex-col items-center">
+      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
+        <h1 className="text-3xl font-bold text-green-600 mb-4">Payment Successful!</h1>
 
-      {/* Add "OK" button to go back to home */}
-      <button
-        onClick={() => navigate('/home')} // Redirect to Home page
-        className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-      >
-        OK, Go Back to Home
-      </button>
+        <div className="bg-green-100 p-4 rounded-md mb-6">
+          <p className="text-lg text-gray-700">Order ID: <strong>{payment.orderId}</strong></p>
+          <p className="text-lg text-gray-700">Amount: <strong>LKR {payment.amount}</strong></p>
+          <p className="text-lg text-gray-700">Status: <strong>{payment.paymentStatus}</strong></p>
+        </div>
+
+        {/* Add "OK" button to go back to home */}
+        <button
+          onClick={() => navigate('/home')} // Redirect to Home page
+          className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300"
+        >
+          OK, Go Back to Home
+        </button>
+      </div>
     </div>
   );
 }

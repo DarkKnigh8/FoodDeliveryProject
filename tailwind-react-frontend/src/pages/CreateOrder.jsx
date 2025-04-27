@@ -14,6 +14,7 @@ export default function CreateOrder() {
   const [quantities, setQuantities] = useState({});
   const [loading, setLoading] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState(null);
+  const [orderConfirmed, setOrderConfirmed] = useState(false); // Track order confirmation status
 
   const handleQuantityChange = (item, qty) => {
     setQuantities((prev) => ({ ...prev, [item.name]: qty }));
@@ -36,6 +37,7 @@ export default function CreateOrder() {
 
     if (res._id) {
       setConfirmedOrderId(res._id); // Store real orderId here
+      setOrderConfirmed(true); // Set order as confirmed
       alert('✅ Order confirmed! You can now proceed to checkout.');
     } else {
       alert('❌ Failed to confirm order: ' + (res.error || 'Unknown error'));
@@ -60,7 +62,7 @@ export default function CreateOrder() {
       <h2 className="text-3xl font-semibold text-gray-800 mb-6">Your Cart</h2>
 
       {/* 🏪 Restaurant Info Card */}
-      <div className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 p-6 rounded-lg shadow-md text-white mb-10">
+      <div className="bg-gradient-to-r from-gray-800 to-black p-6 rounded-lg shadow-md text-white mb-10">
         <h2 className="text-4xl font-semibold">{restaurantName}</h2>
         <p className="mt-2">📍 {restaurantLocation}</p>
         <p className="text-sm mt-1">🕓 Estimated Time: 25-35 mins</p>
@@ -96,23 +98,25 @@ export default function CreateOrder() {
             <p>Total: LKR {total}</p>
           </div>
 
-          {/* 🚀 Dual Action Buttons */}
+          {/* 🚀 Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={handleConfirmOrder}
-              disabled={loading}
-              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
-            >
-              {loading ? 'Confirming...' : 'Confirm Order'}
-            </button>
-
-            <button
-              onClick={handleGoToCheckout}
-              disabled={!confirmedOrderId}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
-            >
-              Go to Checkout
-            </button>
+            {/* Show Confirm Order Button only */}
+            {!orderConfirmed ? (
+              <button
+                onClick={handleConfirmOrder}
+                disabled={loading}
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
+              >
+                {loading ? 'Confirming...' : 'Confirm Order'}
+              </button>
+            ) : (
+              <button
+                onClick={handleGoToCheckout}
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold focus:outline-none"
+              >
+                Go to Checkout
+              </button>
+            )}
           </div>
         </div>
       )}

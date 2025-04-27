@@ -2,7 +2,7 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-r from-green-300 to-blue-500 py-6 w-full">
+    <footer className="bg-gradient-to-r from-gray-800 to-black py-6 w-full">
       <div className="container mx-auto flex justify-between items-center px-6">
         
         {/* Logo */}
