@@ -82,14 +82,14 @@ export default function Checkout() {
   };
 
   const handlePayNow = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const userId = getUserIdFromToken(); // Fetch user ID from JWT token
+    if (!userId) {
       alert('Please log in first.');
       return;
     }
 
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const userId = payload?.userId;
+   // const payload = JSON.parse(atob(token.split('.')[1]));
+    //const userId = payload?.userId;
 
     if (!userId || !orderId || !totalAmount) {
       alert('Missing user or order info.');

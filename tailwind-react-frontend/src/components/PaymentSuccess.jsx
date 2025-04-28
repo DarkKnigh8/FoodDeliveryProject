@@ -28,6 +28,14 @@ export default function PaymentSuccess() {
     }
   }, []);
 
+  const handleTrackOrder = () => {
+    if (confirmedDeliveryId) {
+      navigate(`/track/${confirmedDeliveryId}`); // Redirect to /track/:deliveryId
+    } else {
+      alert('No delivery assigned yet.');
+    }
+  };
+
   // While loading payment details, show loading message
   if (loading) {
     return (
@@ -59,10 +67,10 @@ export default function PaymentSuccess() {
 
         {/* Add "OK" button to go back to home */}
         <button
-          onClick={() => navigate('/home')} // Redirect to Home page
+          onClick={handleTrackOrder}// Redirect to Home page
           className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300"
         >
-          OK, Go Back to Home
+          OK, Go Back to Track Your Order
         </button>
       </div>
     </div>
