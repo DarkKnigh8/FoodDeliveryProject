@@ -1,29 +1,30 @@
 import express from 'express';
 import {
-  createDelivery,
+  confirmCheckout,
   updateStatus,
-  getDeliveriesByPerson,
   getAssignedDelivery,
-  confirmCheckout // merged in from the CommonJS part
+  getDeliveriesByPerson,
+  getDeliveryById, // ✅ Import this controller
 } from '../controllers/deliveryController.js';
 
-import { authenticate, requireRole } from '../middleware/authMiddleware.js';
+import { authenticate, requireRole, allowRoles } from '../middleware/authMiddleware.js'; // ✅ allowRoles needed
 
 const router = express.Router();
 
-// Route: Get the assigned delivery for the logged-in driver
-router.get('/assigned', authenticate, requireRole('delivery'), getAssignedDelivery);
-
-// Route: Create a delivery (only restaurants)
-router.post('/', authenticate, requireRole('restaurant'), createDelivery);
-
-// Route: Update delivery status (only delivery personnel)
-router.put('/:id/status', authenticate, requireRole('delivery'), updateStatus);
-
-// Route: Get deliveries for the logged-in delivery person
-router.get('/my', authenticate, requireRole('delivery'), getDeliveriesByPerson);
-
-// Route: Confirm checkout (only customers)
+// ✅ 1. Customer initiates checkout → Create delivery
 router.post('/checkout', authenticate, requireRole('customer'), confirmCheckout);
 
+// ✅ 2. Driver updates delivery status (picked/delivered)
+router.put('/:id/status', authenticate, requireRole('delivery'), updateStatus);
+
+// ✅ 3. Driver fetches their currently assigned active delivery
+router.get('/assigned', authenticate, requireRole('delivery'), getAssignedDelivery);
+
+// ✅ 4. Driver fetches all deliveries assigned to them
+router.get('/my', authenticate, requireRole('delivery'), getDeliveriesByPerson);
+
+// ✅ 5. Anyone (admin, customer, delivery) fetches a delivery by ID
+router.get('/:id', authenticate, allowRoles(['admin', 'customer', 'delivery']), getDeliveryById);
+
+// Export the router at the end of the file
 export default router;
