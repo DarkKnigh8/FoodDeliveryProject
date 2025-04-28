@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: ds-assignment-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+
+
+  restaurant-service:
+    build:
+      context: ./restaurant_service  # Ensure this path is correct
+      dockerfile: DockerFile  # Ensure this matches the file name in the service directory
+    container_name: ds-assignment-restaurant-service
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/restaurant
+    depends_on:
+      - mongo
+
+  order-service:
+    build:
+      context: ./order_service  # Ensure this path is correct
+      dockerfile: DockerFile  # Ensure this matches the file name in the service directory
+    container_name: ds-assignment-order-service
+    ports:
+      - "5005:5005"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/order
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
