@@ -78,7 +78,7 @@ export default function MenuManager({ restaurantId }) {
   };
 
   return (
-    <div className=" min-h-screen bg-gradient-to-r from-blue-50 via-white to-blue-50 px-6 py-12">
+    <div className=" min-h-screen bg-gradient-to-r from-white-50 via-white to-blue-50 px-6 py-12">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold">Menu Manager</h3>
         <button
