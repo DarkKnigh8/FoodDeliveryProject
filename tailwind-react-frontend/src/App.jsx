@@ -11,8 +11,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import Landing from './pages/Landing';
 import DeliveryTracker from './pages/DeliveryTracker'; 
 import DriverDashboard from './pages/DriverDashboard';
-import AdminDashboard from './pages/AdminDashboard'; // Corrected typo: AdminDashbord -> AdminDashboard
-import ProtectedRoute from './components/ProtectedRoute';
+
+
 
 import AdminResRegistration from './pages/AdminResRegistration';
 import ManageOrders from './pages/ManageOrders';
