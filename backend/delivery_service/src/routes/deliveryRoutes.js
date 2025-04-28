@@ -1,12 +1,29 @@
-const express = require('express');
+import express from 'express';
+import {
+  createDelivery,
+  updateStatus,
+  getDeliveriesByPerson,
+  getAssignedDelivery,
+  confirmCheckout // merged in from the CommonJS part
+} from '../controllers/deliveryController.js';
+
+import { authenticate, requireRole } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
-const { confirmCheckout } = require('../controllers/deliveryController');
-const { authenticate, requireRole } = require('../middleware/authMiddleware');
 
-// Use authentication middleware for all routes in this router
-router.use(authenticate);
+// Route: Get the assigned delivery for the logged-in driver
+router.get('/assigned', authenticate, requireRole('delivery'), getAssignedDelivery);
 
-// Only customers are allowed to confirm checkout
-router.post('/checkout', requireRole('customer'), confirmCheckout);
+// Route: Create a delivery (only restaurants)
+router.post('/', authenticate, requireRole('restaurant'), createDelivery);
 
-module.exports = router;
+// Route: Update delivery status (only delivery personnel)
+router.put('/:id/status', authenticate, requireRole('delivery'), updateStatus);
+
+// Route: Get deliveries for the logged-in delivery person
+router.get('/my', authenticate, requireRole('delivery'), getDeliveriesByPerson);
+
+// Route: Confirm checkout (only customers)
+router.post('/checkout', authenticate, requireRole('customer'), confirmCheckout);
+
+export default router;

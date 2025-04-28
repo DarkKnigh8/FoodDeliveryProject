@@ -40,6 +40,19 @@ export const authAPI = axios.create({
   baseURL: 'http://localhost:5001/api/auth',
 });
 
+
+
+
+// Delivery service (usually on port 5003)
+export const deliveryAPI = axios.create({
+  baseURL: 'http://localhost:5003/api',
+});
+
+deliveryAPI.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 // --------------------
 // ORDER SERVICE (port 5005)
 // --------------------
@@ -178,6 +191,7 @@ export const fetchDeliveryDetails = async (deliveryId) => {
   const data = await res.json();
   return data;
 };
+
 
 const BASE_ADMIN_URL = 'http://localhost:5050/api/admin';
 

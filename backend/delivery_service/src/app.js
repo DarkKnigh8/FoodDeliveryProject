@@ -1,11 +1,19 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const http = require('http');
-const { Server } = require('socket.io');
-const setupSocket = require('./socket');
-const deliveryRoutes = require('./routes/deliveryRoutes'); // <-- Make sure this exists
-require('dotenv').config();
-const cors = require('cors');
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import deliveryRoutes from './routes/deliveryRoutes.js';
+import driverRoutes from './routes/driverRoutes.js';
+import errorHandler from './middleware/errorHandler.js';
+import { setupSocket } from './socket.js'; // Named import
+
+dotenv.config();
+
+// Connect MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 
 const app = express();
 const server = http.createServer(app);
@@ -20,25 +28,17 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// WebSocket Setup
-const io = new Server(server, {
-  cors: {
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST'],
-  },
-});
-setupSocket(io); // Hook the WebSocket events
+// Routes
+app.use('/api/drivers', driverRoutes);
+app.use('/api/deliveries', deliveryRoutes);
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.error('MongoDB Error:', err));
+// Error Handler (should be last middleware)
+app.use(errorHandler);
 
-// REST API Routes
-app.use('/api/deliveries', deliveryRoutes); // Only delivery routes for now
+// Initialize WebSocket
+setupSocket(server); // Using the named export
 
-// Start Server
 const PORT = process.env.PORT || 5006;
 server.listen(PORT, () => {
-  console.log(`🚚 Delivery Service running with WebSocket on port ${PORT}`);
+  console.log(`Delivery Service running with WebSocket on port ${PORT}`);
 });

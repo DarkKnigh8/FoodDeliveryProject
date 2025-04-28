@@ -2,13 +2,12 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-
 // Register controller
 export const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    const allowedRoles = ['customer', 'restaurant', 'admin', "delivery"];
+    const allowedRoles = ['customer', 'restaurant', 'admin', 'delivery'];
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }

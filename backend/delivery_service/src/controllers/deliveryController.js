@@ -1,57 +1,126 @@
-const axios = require('axios');
-const Delivery = require('../models/Delivery');
+import mongoose from 'mongoose';
+import axios from 'axios';
+import Delivery from '../models/Delivery.js';
+import Driver from '../models/Driver.js';
+import { getIO } from '../socket.js'; // For real-time updates
 
-// Confirm Checkout Controller
-exports.confirmCheckout = async (req, res) => {
+// Create Delivery and Auto-Assign Driver
+export const createDelivery = async (req, res) => {
+  try {
+    const delivery = await Delivery.create(req.body);
+
+    const availableDrivers = await Driver.find({ isAvailable: true });
+
+    if (!availableDrivers.length) {
+      return res.status(200).json({ message: 'Delivery created, but no drivers available', delivery });
+    }
+
+    const assignedDriver = availableDrivers[0];
+    delivery.deliveryPersonId = assignedDriver._id;
+    delivery.status = 'assigned';
+    await delivery.save();
+
+    assignedDriver.isAvailable = false;
+    await assignedDriver.save();
+
+    const io = getIO();
+    io.emit(`delivery-${delivery._id}-status`, { status: delivery.status });
+
+    res.status(201).json({ message: 'Delivery created and driver assigned', delivery });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// Update Delivery Status
+export const updateStatus = async (req, res) => {
+  try {
+    const delivery = await Delivery.findByIdAndUpdate(req.params.id, {
+      status: req.body.status
+    }, { new: true });
+
+    const io = getIO();
+    io.emit(`delivery-${delivery._id}-status`, { status: delivery.status });
+
+    res.json(delivery);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// Get Assigned Delivery
+export const getAssignedDelivery = async (req, res) => {
+  try {
+    const driverId = mongoose.Types.ObjectId(req.user.id);
+    const deliveries = await Delivery.find({ deliveryPersonId: driverId });
+
+    if (!deliveries || deliveries.length === 0) {
+      return res.status(404).json({ message: 'No deliveries assigned to this driver.' });
+    }
+
+    const assignedDelivery = deliveries.find(delivery => delivery.status === 'assigned');
+
+    if (assignedDelivery) {
+      return res.json(assignedDelivery);
+    } else {
+      return res.status(404).json({ message: 'No assigned deliveries found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Internal Server Error: ' + err.message });
+  }
+};
+
+// Confirm Checkout
+export const confirmCheckout = async (req, res) => {
   try {
     const { orderId, address, phone, paymentMethod } = req.body;
 
-    console.log('📥 Confirm Checkout Request:', { orderId, address, phone, paymentMethod });
-
-    // Validate required fields
     if (!orderId || !address || !phone) {
-      console.log('❌ Missing Fields');
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Fetch order details from order service
     const orderServiceURL = `http://localhost:5005/api/orders/${orderId}`;
-    let order;
+    const orderResponse = await axios.get(orderServiceURL, {
+      headers: { Authorization: req.headers.authorization }
+    });
 
-    try {
-      const orderResponse = await axios.get(orderServiceURL, {
-        headers: { Authorization: req.headers.authorization }
-      });
-      order = orderResponse.data;
-      console.log('✅ Order Fetched:', order);
-    } catch (fetchError) {
-      console.error('❌ Failed to Fetch Order:', fetchError.message);
-      return res.status(500).json({ message: 'Failed to fetch order details' });
-    }
-
+    const order = orderResponse.data;
     if (!order || !order.customerId) {
-      console.log('❌ Order Not Found or Missing Customer ID');
-      return res.status(404).json({ message: 'Order not found from order service' });
+      return res.status(404).json({ message: 'Order not found or missing customer ID' });
     }
 
-    // Create and save new delivery without driver assignment
+    const availableDriver = await Driver.findOne({ isAvailable: true });
+    if (!availableDriver) {
+      return res.status(200).json({ message: 'No drivers available right now' });
+    }
+
+    availableDriver.isAvailable = false;
+    await availableDriver.save();
+
     const newDelivery = new Delivery({
       orderId,
       customerId: order.customerId,
       address,
       phone,
       paymentMethod,
-      status: 'Pending', // No need for 'Assigned' status anymore
-      assignedDriver: null, // No driver assignment here
+      status: 'Assigned',
+      deliveryPersonId: availableDriver._id
     });
 
     const savedDelivery = await newDelivery.save();
-    console.log('✅ Delivery Saved:', savedDelivery);
-
-    return res.status(201).json(savedDelivery);
+    res.status(201).json(savedDelivery);
 
   } catch (error) {
-    console.error('❌ Unhandled Confirm Checkout Error:', error.message);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Get Deliveries by Logged-in Delivery Person
+export const getDeliveriesByPerson = async (req, res) => {
+  try {
+    const deliveries = await Delivery.find({ deliveryPersonId: req.user.id });
+    res.status(200).json(deliveries);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching deliveries' });
   }
 };

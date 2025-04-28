@@ -2,10 +2,18 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LandDes from './components/LandDes';
 import Login from './pages/Login';
 import Register from './pages/Register';
+
 import Home from './pages/Home';
 import RestaurantDashboard from './pages/RestaurantDashboard';
 import UserRestaurantMenu from './pages/UserRestaurantMenu';
 import AdminDashboard from './pages/AdminDashboard';
+
+import Landing from './pages/Landing';
+import DeliveryTracker from './pages/DeliveryTracker'; 
+import DriverDashboard from './pages/DriverDashboard';
+import AdminDashboard from './pages/AdminDashboard'; // Corrected typo: AdminDashbord -> AdminDashboard
+import ProtectedRoute from './components/ProtectedRoute';
+
 import AdminResRegistration from './pages/AdminResRegistration';
 import ManageOrders from './pages/ManageOrders';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -16,8 +24,10 @@ import CreateOrder from './pages/CreateOrder';
 import MyOrders from './pages/MyOrders';
 import Checkout from './pages/Checkout';
 import TrackOrder from './pages/TrackOrder';
+
 import AdminTransactions from './pages/AdminTransactions';
 // import DeliveryTracker from './pages/DeliveryTracker'; // Assuming it's implemented
+
 
 function App() {
   return (
@@ -45,7 +55,14 @@ function App() {
             <Route path="/restaurantDashboard" element={<RestaurantDashboard />} />
             <Route path="/restaurants/:id" element={<UserRestaurantMenu />} />
             <Route path="/adminDashboard" element={<AdminDashboard />} />
+
             <Route path="/admin/transactions" element={<AdminTransactions />} />
+
+            <Route path="/track" element={<DeliveryTracker />} />
+            <Route path="/track/:id" element={<DeliveryTracker />} />
+            <Route path="/driver" element={<DriverDashboard />} />
+
+
             <Route path="/resReg" element={<AdminResRegistration />} />
             <Route path="/restaurants/:restaurantId/orders" element={<ManageOrders />} />
             
@@ -75,7 +92,9 @@ function App() {
               }
             />
 
-            {/* Checkout and Payment Routes */}
+
+           
+
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
 
