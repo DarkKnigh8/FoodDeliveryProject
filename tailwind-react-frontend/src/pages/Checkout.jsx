@@ -73,13 +73,13 @@ export default function Checkout() {
     }
   };
 
-  const handleTrackOrder = () => {
-    if (confirmedDeliveryId) {
-      navigate(`/track/${confirmedDeliveryId}`); // Redirect to /track/:deliveryId
-    } else {
-      alert('No delivery assigned yet.');
-    }
-  };
+  // const handleTrackOrder = () => {
+  //   if (confirmedDeliveryId) {
+  //     navigate(`/track/${confirmedDeliveryId}`); // Redirect to /track/:deliveryId
+  //   } else {
+  //     alert('No delivery assigned yet.');
+  //   }
+  // };
 
   const handlePayNow = async () => {
     const userId = getUserIdFromToken(); // Fetch user ID from JWT token
@@ -175,12 +175,12 @@ export default function Checkout() {
       ) : (
         <div className="flex flex-col items-center space-y-4">
           <p className="text-green-600 font-semibold">Delivery confirmed successfully!</p>
-          <button
+          {/* <button
             onClick={handleTrackOrder}
             className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
           >
             🚚 Track Your Order
-          </button>
+          </button> */}
           <button
             onClick={handlePayNow}
             className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg"

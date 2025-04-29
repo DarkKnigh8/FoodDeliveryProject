@@ -1,4 +1,3 @@
-# Use an official Node.js runtime as the parent image
 FROM node:23-alpine
 
 # Set the working directory inside the container
@@ -14,7 +13,7 @@ RUN npm install
 COPY . .
 
 # Expose port for the application
-EXPOSE 5005
+EXPOSE 5001
 
 # Command to run the app
 CMD ["npm","start","dev"]
