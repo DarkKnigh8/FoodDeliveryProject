@@ -1,3 +1,179 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Ensure the body and html take full height */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #FFF8DC; /* Set the background to Cornsilk (#FFF8DC) */
+}
+
+/* Body setup */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* Header styling */
+header {
+  width: 100%;
+  padding: 0.75rem 2rem; /* Reduced padding for a fixed header size */
+  background-color: #000000; /* Solid black background */
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Ensure it stays on top of content */
+  box-shadow: 0 4px 2px -2px gray;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+header .nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+header .search-bar {
+  display: flex;
+  align-items: center;
+}
+
+header .search-bar input {
+  padding: 0.5rem;
+  border-radius: 20px;
+  border: none;
+  width: 200px;
+  margin-right: 10px;
+}
+
+header .search-bar button {
+  background-color: #3498db;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 50%;
+  color: white;
+}
+
+/* Main content area */
+main {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #FFF8DC; /* Set the background to Cornsilk (#FFF8DC) */
+  overflow-y: auto; /* Make content scrollable */
+  margin-top: 80px; /* Prevent overlap with fixed header */
+}
+
+/* Footer styling */
+footer {
+  width: 100%;
+  padding: 1rem 2rem;
+  background-color: #000000; /* Solid black footer */
+  color: white;
+  position: relative; /* Footer should scroll with content */
+  text-align: center;
+  margin-top: auto;
+}
+
+/* Styling for dropdown menu in user profile */
+header .user-dropdown {
+  position: relative;
+}
+
+header .user-dropdown button {
+  background: none;
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+header .user-dropdown .dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  width: 200px;
+}
+
+header .user-dropdown.active .dropdown-menu {
+  display: block;
+}
+
+header .user-dropdown .dropdown-menu a {
+  color: #2c3e50;
+  padding: 8px;
+  text-decoration: none;
+  display: block;
+  font-size: 1rem;
+}
+
+header .user-dropdown .dropdown-menu a:hover {
+  background-color: #ecf0f1;
+}
+
+/* Media Queries for mobile responsiveness */
+@media (max-width: 768px) {
+  header {
+    padding: 0.75rem 1.5rem;
+  }
+
+  header .nav-links {
+    display: none;
+  }
+
+  header .search-bar input {
+    width: 120px;
+  }
+
+  header .search-bar button {
+    font-size: 1.25rem;
+  }
+
+  header .user-dropdown button {
+    font-size: 1.25rem;
+  }
+
+  footer {
+    padding: 1rem 1.5rem;
+  }
+
+  footer .social-links {
+    margin-top: 10px;
+  }
+}
+
+/* Footer Adjustments for Small Screens */
+@media (max-width: 600px) {
+  header {
+    padding: 0.5rem 1rem;
+  }
+
+  main {
+    padding: 10px;
+    margin-top: 100px; /* Adjust margin-top for small screens */
+  }
+
+  footer {
+    padding: 1rem 1rem;
+  }
+}
+
+/* Dropdown Menu for small screens */
+@media (max-width: 768px) {
+  header .user-dropdown .dropdown-menu {
+    top: 45px;
+    right: 10px;
+  }
+}

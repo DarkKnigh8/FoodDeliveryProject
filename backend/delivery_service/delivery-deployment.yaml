@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-deployment
+  labels:
+    app: delivery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delivery
+  template:
+    metadata:
+      labels:
+        app: delivery
+    spec:
+      containers:
+        - name: delivery
+          image:  vikz642/delivery_repo:v6 # Replace with your actual Docker image if different
+          ports:
+            - containerPort: 5006
+          env:
+            - name: PORT
+              value: "5006"
+            - name: MONGO_URI
+              value: mongodb+srv://sm:mihi@cluster0.aslaq.mongodb.net/Finace_Tracker
+            - name: JWT_SECRET
+              value: yourSuperSecretKey
+            - name: JWT_EXPIRES_IN
+              value: 1h
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery-service
+spec:
+  type: NodePort
+  selector:
+    app: delivery
+  ports:
+    - port: 5006
+      targetPort: 5006
+      nodePort: 30007  # Accessible via http://localhost:30007

@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  restaurant-service:
+    build:
+      context: ./restaurant_service
+      dockerfile: DockerFile
+    container_name: ds-assignment-restaurant-service
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb+srv://sm:mihi@cluster0.aslaq.mongodb.net/Finace_Tracker
+      - JWT_SECRET=yourSuperSecretKey
+      - JWT_EXPIRES_IN=1h
+    volumes:
+      - ./restaurant_service/public/uploads:/app/public/uploads
+
+  order-service:
+    build:
+      context: ./order_service
+      dockerfile: DockerFile
+    container_name: ds-assignment-order-service
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+      - MONGO_URI=mongodb+srv://vikummune123:VIk123abc@cluster1.2sye1.mongodb.net/order?retryWrites=true&w=majority&appName=Cluster1
+      - JWT_SECRET=yourSuperSecretKey
+      - JWT_EXPIRES_IN=1h
+  payment-service:
+    build:
+      context: ./payment_service
+      dockerfile: DockerFile
+    container_name: ds-assignment-payment-service
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+      - MONGO_URI=mongodb+srv://vikummune123:VIk123abc@cluster1.2sye1.mongodb.net/order?retryWrites=true&w=majority&appName=Cluster1
+      - JWT_SECRET=yourSuperSecretKey
+      - JWT_EXPIRES_IN=1h
+  delivery-service:
+    build:
+      context: ./delivery_service
+      dockerfile: DockerFile
+    container_name: ds-assignment-delivery-service
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+      - MONGO_URI=mongodb+srv://vikummune123:VIk123abc@cluster1.2sye1.mongodb.net/order?retryWrites=true&w=majority&appName=Cluster1
+      - JWT_SECRET=yourSuperSecretKey
+      - JWT_EXPIRES_IN=1h
+
+  auth-service:
+    build:
+      context: ./auth_service
+      dockerfile: DockerFile
+    container_name: ds-assignment-auth-service
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb+srv://vikummune123:VIk123abc@cluster1.2sye1.mongodb.net/order?retryWrites=true&w=majority&appName=Cluster1
+      - JWT_SECRET=yourSuperSecretKey
+      - JWT_EXPIRES_IN=1h
+
+  admin-service:
+    build:
+      context: ./admin_service
+      dockerfile: DockerFile
+    container_name: ds-assignment-admin-service
+    ports:
+      - "5050:5050"
+    environment:
+      - PORT=5050
+      - MONGO_URI=mongodb+srv://vikummune123:VIk123abc@cluster1.2sye1.mongodb.net/order?retryWrites=true&w=majority&appName=Cluster1
+      - JWT_SECRET=yourSuperSecretKey
+      - JWT_EXPIRES_IN=1h
+
+
+
+# Remove mongo service because you're using MongoDB Atlas
+# Remove volumes section unless you use it elsewhere
