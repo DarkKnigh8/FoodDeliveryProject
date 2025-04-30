@@ -1,40 +1,33 @@
-import { useEffect, useState } from 'react';
+// PaymentSuccess.jsx
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const [payment, setPayment] = useState(null);
-  const [loading, setLoading] = useState(true); // Track loading state
-  const navigate = useNavigate(); // Hook for navigation
+  const [loading, setLoading] = useState(true); 
+  const navigate = useNavigate(); 
+
+  const confirmedDeliveryId = searchParams.get('session_id'); // Get the deliveryId from URL
 
   useEffect(() => {
-    const sessionId = searchParams.get('session_id'); // Extract session_id from URL
-    if (sessionId) {
-      // Call backend to confirm the payment using session_id
+    if (confirmedDeliveryId) {
       fetch("http://localhost:5004/api/payments/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId }) // Send session_id to backend
+        body: JSON.stringify({ sessionId: confirmedDeliveryId }) 
       })
-      .then(res => res.json()) // Handle the response from backend
+      .then(res => res.json()) 
       .then(data => {
-        setPayment(data); // Save payment data
-        setLoading(false); // Stop loading once data is fetched
+        setPayment(data); 
+        setLoading(false); 
       })
       .catch(error => {
         console.error("Error confirming payment:", error);
-        setLoading(false); // Stop loading on error
+        setLoading(false);
       });
     }
-  }, []);
-
-  const handleTrackOrder = () => {
-    if (confirmedDeliveryId) {
-      navigate(`/track/${confirmedDeliveryId}`); // Redirect to /track/:deliveryId
-    } else {
-      alert('No delivery assigned yet.');
-    }
-  };
+  }, [confirmedDeliveryId]);
 
   // While loading payment details, show loading message
   if (loading) {
@@ -54,6 +47,10 @@ export default function PaymentSuccess() {
     );
   }
 
+  const handleTrackOrder = () => {
+    navigate(`/track/${confirmedDeliveryId}`); // Navigate to the Track Order page
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-100 to-blue-300 py-10 px-4 flex flex-col items-center">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
@@ -65,12 +62,12 @@ export default function PaymentSuccess() {
           <p className="text-lg text-gray-700">Status: <strong>{payment.paymentStatus}</strong></p>
         </div>
 
-        {/* Add "OK" button to go back to home */}
+        {/* Add "Track Your Order" button */}
         <button
-          onClick={handleTrackOrder}// Redirect to Home page
+          onClick={handleTrackOrder} 
           className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full text-lg font-semibold transition-all duration-300"
         >
-          OK, Go Back to Track Your Order
+          🚚 Track Your Order
         </button>
       </div>
     </div>

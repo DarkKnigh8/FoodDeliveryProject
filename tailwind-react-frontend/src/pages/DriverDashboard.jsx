@@ -12,12 +12,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-const socket = io('http://localhost:5006');
+const socket = io('http://localhost:5006'); // Ensure this matches your backend URL
 
 const DriverDashboard = () => {
   const [delivery, setDelivery] = useState(null);
   const [error, setError] = useState('');
-  const [position, setPosition] = useState([6.9271, 79.8612]);
+  const [position, setPosition] = useState([6.9271, 79.8612]); // Default to Colombo
 
   useEffect(() => {
     const fetchAssignedDelivery = async () => {
@@ -26,10 +26,7 @@ const DriverDashboard = () => {
         if (res.data) {
           setDelivery(res.data);
           if (res.data.driverLocation) {
-            setPosition([
-              res.data.driverLocation.lat,
-              res.data.driverLocation.lng
-            ]);
+            setPosition([res.data.driverLocation.lat, res.data.driverLocation.lng]);
           }
         }
       } catch (err) {
@@ -48,9 +45,17 @@ const DriverDashboard = () => {
       setPosition([lat, lng]);
     });
 
+    socket.on(`delivery-${delivery._id}-status`, ({ status }) => {
+      setDelivery((prevDelivery) => ({
+        ...prevDelivery,
+        status: status,
+      }));
+    });
+
     return () => {
       if (delivery) {
         socket.off(`track-${delivery._id}`);
+        socket.off(`delivery-${delivery._id}-status`);
       }
     };
   }, [delivery]);
@@ -60,11 +65,12 @@ const DriverDashboard = () => {
 
     try {
       const res = await deliveryAPI.put(`/deliveries/${delivery._id}/status`, { status: newStatus });
-      setDelivery(prev => ({ ...prev, status: res.data.status }));
+      setDelivery((prev) => ({ ...prev, status: res.data.status }));
+
+      // Emit the status update event
+      socket.emit(`delivery-${delivery._id}-status`, { status: newStatus });
 
       alert(`Status updated to ${newStatus}`);
-
-      socket.emit(`delivery-${delivery._id}-status`, { status: newStatus });
     } catch (err) {
       console.error('Update Error:', err);
       alert('Failed to update status.');
@@ -91,7 +97,7 @@ const DriverDashboard = () => {
 
               <div className="flex space-x-4 mt-4">
                 {delivery.status === 'assigned' && (
-                  <button 
+                  <button
                     onClick={() => updateStatus('picked')}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg transition"
                   >
@@ -99,7 +105,7 @@ const DriverDashboard = () => {
                   </button>
                 )}
                 {delivery.status === 'picked' && (
-                  <button 
+                  <button
                     onClick={() => updateStatus('delivered')}
                     className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg transition"
                   >

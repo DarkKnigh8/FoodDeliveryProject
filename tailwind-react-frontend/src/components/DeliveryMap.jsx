@@ -13,14 +13,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-// Connect socket
 const socket = io('http://localhost:5006');
 
 const steps = ['pending', 'assigned', 'picked', 'delivered'];
 
 const DeliveryMap = ({ deliveryId }) => {
   const [position, setPosition] = useState([6.9271, 79.8612]); // Default Colombo
-  const [status, setStatus] = useState('pending');
+  const [status, setStatus] = useState('assigned');
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -29,10 +28,9 @@ const DeliveryMap = ({ deliveryId }) => {
 
     const loadDelivery = async () => {
       try {
-        const data = await fetchDeliveryDetails(deliveryId);  // ✅ Correct
-        console.log('📦 Delivery fetched:', data);
-        if (data?.status) setStatus(data.status.toLowerCase());
-        if (data?.driverLocation) {
+        const data = await fetchDeliveryDetails(deliveryId);
+        setStatus(data.status.toLowerCase());
+        if (data.driverLocation) {
           setPosition([data.driverLocation.lat, data.driverLocation.lng]);
         }
       } catch (err) {
@@ -42,14 +40,11 @@ const DeliveryMap = ({ deliveryId }) => {
 
     loadDelivery();
 
-    // Listen for real-time status and location
     socket.on(`delivery-${deliveryId}-status`, ({ status }) => {
-      console.log('📡 Status update received:', status);
       setStatus(status.toLowerCase());
     });
 
     socket.on(`track-${deliveryId}`, ({ lat, lng }) => {
-      console.log('📡 Location update received:', lat, lng);
       setPosition([lat, lng]);
     });
 
@@ -90,7 +85,9 @@ const DeliveryMap = ({ deliveryId }) => {
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${circleStyle}`}>
                   {index + 1}
                 </div>
-                <p className={`mt-1 text-sm ${labelStyle}`}>{step.charAt(0).toUpperCase() + step.slice(1)}</p>
+                <p className={`mt-1 text-sm ${labelStyle}`}>
+                  {step.charAt(0).toUpperCase() + step.slice(1)}
+                </p>
               </div>
             );
           })}
