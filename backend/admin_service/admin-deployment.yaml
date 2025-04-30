@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-deployment
+  labels:
+    app: admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      containers:
+        - name: admin
+          image:  vikz642/admin_repo:v5 # Replace with your actual Docker image if different
+          ports:
+            - containerPort: 5050
+          env:
+            - name: PORT
+              value: "5050"
+            - name: MONGO_URI
+              value: mongodb+srv://sm:mihi@cluster0.aslaq.mongodb.net/Finace_Tracker
+            - name: JWT_SECRET
+              value: yourSuperSecretKey
+            - name: JWT_EXPIRES_IN
+              value: 1h
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+spec:
+  type: NodePort
+  selector:
+    app: admin
+  ports:
+    - port: 5050
+      targetPort: 5050
+      nodePort: 30006  # Accessible via http://localhost:30006

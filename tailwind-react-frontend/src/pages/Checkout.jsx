@@ -75,7 +75,7 @@ export default function Checkout() {
 
   // const handleTrackOrder = () => {
   //   if (confirmedDeliveryId) {
-  //     navigate(/track/${confirmedDeliveryId}); // Redirect to /track/:deliveryId
+  //     navigate(`/track/${confirmedDeliveryId}`); // Redirect to /track/:deliveryId
   //   } else {
   //     alert('No delivery assigned yet.');
   //   }
