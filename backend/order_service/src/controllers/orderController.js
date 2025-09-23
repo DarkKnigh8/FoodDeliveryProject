@@ -1,36 +1,55 @@
+// controllers/orderController.js — Hardened against injection and misuse
+
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
+
+// ✅ Utility: validate Mongo ObjectId
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// ✅ Utility: sanitize text fields
+const sanitizeString = (str) => {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[<>"'`]/g, '').trim();
+};
 
 // Place a new order
 exports.placeOrder = async (req, res) => {
   try {
     const { restaurantId, items, totalPrice } = req.body;
 
-    console.log("Incoming order request:");
-    console.log("User:", req.user);
-    console.log("Restaurant ID:", restaurantId);
-    console.log("Items:", items);
-    console.log("Total Price:", totalPrice);
-
     if (!req.user || !req.user.id) {
       return res.status(400).json({ error: 'User authentication failed' });
     }
 
-    if (!restaurantId || !Array.isArray(items) || items.length === 0 || !totalPrice) {
-      return res.status(400).json({ error: 'Missing required order fields' });
+    // ✅ Validate inputs
+    if (
+      !restaurantId ||
+      !Array.isArray(items) ||
+      items.length === 0 ||
+      typeof totalPrice !== 'number'
+    ) {
+      return res.status(400).json({ error: 'Missing or invalid order fields' });
     }
+
+    // ✅ Sanitize restaurantId
+    const cleanRestaurantId = sanitizeString(restaurantId);
 
     const newOrder = new Order({
       customerId: req.user.id,
-      restaurantId,
-      items,
-      totalPrice,
+      restaurantId: cleanRestaurantId,
+      items: items.map((it) => ({
+        name: sanitizeString(it.name),
+        quantity: Number(it.quantity) || 0,
+        price: Number(it.price) || 0,
+      })),
+      totalPrice: Number(totalPrice),
     });
 
     const saved = await newOrder.save();
     res.status(201).json(saved);
   } catch (err) {
-    console.error("Order placement error:", err);
-    res.status(500).json({ error: err.message });
+    console.error('Order placement error:', err);
+    res.status(500).json({ error: 'Failed to place order' });
   }
 };
 
@@ -40,8 +59,8 @@ exports.getMyOrders = async (req, res) => {
     const orders = await Order.find({ customerId: req.user.id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    console.error("Error fetching orders:", err);
-    res.status(500).json({ error: err.message });
+    console.error('Error fetching orders:', err);
+    res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };
 
@@ -51,18 +70,32 @@ exports.updateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
 
-    const updated = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    if (!isValidObjectId(orderId)) {
+      return res.status(400).json({ error: 'Invalid order ID' });
+    }
+
+    const updated = await Order.findByIdAndUpdate(
+      orderId,
+      { status: sanitizeString(status) },
+      { new: true }
+    );
     if (!updated) return res.status(404).json({ error: 'Order not found' });
 
     res.json(updated);
   } catch (err) {
-    console.error("Error updating order status:", err);
-    res.status(500).json({ error: err.message });
+    console.error('Error updating order status:', err);
+    res.status(500).json({ error: 'Failed to update status' });
   }
 };
+
+// Track an order
 exports.getOrderTracking = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.orderId);
+    const { orderId } = req.params;
+    if (!isValidObjectId(orderId)) {
+      return res.status(400).json({ message: 'Invalid order ID' });
+    }
+    const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ message: 'Order not found' });
     res.json({ status: order.status, location: order.currentLocation });
   } catch (err) {
@@ -70,12 +103,19 @@ exports.getOrderTracking = async (req, res) => {
   }
 };
 
+// Update order location
 exports.updateOrderLocation = async (req, res) => {
   try {
     const { lat, lng } = req.body;
+    const { orderId } = req.params;
+
+    if (!isValidObjectId(orderId)) {
+      return res.status(400).json({ message: 'Invalid order ID' });
+    }
+
     const order = await Order.findByIdAndUpdate(
-      req.params.orderId,
-      { currentLocation: { lat, lng } },
+      orderId,
+      { currentLocation: { lat: Number(lat), lng: Number(lng) } },
       { new: true }
     );
     if (!order) return res.status(404).json({ message: 'Order not found' });
@@ -90,21 +130,32 @@ exports.getOrdersByRestaurant = async (req, res) => {
   const { restaurantId } = req.params;
 
   try {
-    // Ensure user has the 'restaurant' role
     if (req.user.role !== 'restaurant') {
       return res.status(403).json({ message: 'Forbidden: Not a restaurant owner' });
     }
 
-    // Only fetch orders where restaurantId matches AND userId matches the token
-    const orders = await Order.find({ restaurantId, ownerId: req.user.id }).sort({ createdAt: -1 });
+    // ✅ Sanitize restaurantId
+    const cleanRestaurantId = sanitizeString(restaurantId);
+
+    const orders = await Order.find({
+      restaurantId: cleanRestaurantId,
+      ownerId: req.user.id,
+    }).sort({ createdAt: -1 });
+
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch restaurant orders' });
   }
 };
+
+// Delete order
 exports.deleteOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
+    if (!isValidObjectId(orderId)) {
+      return res.status(400).json({ message: 'Invalid order ID' });
+    }
+
     const order = await Order.findByIdAndDelete(orderId);
     if (!order) return res.status(404).json({ message: 'Order not found' });
     res.json({ message: 'Order deleted successfully' });
@@ -113,14 +164,26 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
+// Edit order
 exports.editOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { items, totalPrice } = req.body;
 
+    if (!isValidObjectId(orderId)) {
+      return res.status(400).json({ message: 'Invalid order ID' });
+    }
+
     const updated = await Order.findByIdAndUpdate(
       orderId,
-      { items, totalPrice },
+      {
+        items: (items || []).map((it) => ({
+          name: sanitizeString(it.name),
+          quantity: Number(it.quantity) || 0,
+          price: Number(it.price) || 0,
+        })),
+        totalPrice: Number(totalPrice) || 0,
+      },
       { new: true }
     );
 
@@ -131,10 +194,15 @@ exports.editOrder = async (req, res) => {
   }
 };
 
-//for the delivery service to get order by ID
+// For delivery service
 exports.getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.orderId);
+    const { orderId } = req.params;
+    if (!isValidObjectId(orderId)) {
+      return res.status(400).json({ error: 'Invalid order ID' });
+    }
+
+    const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(order);
   } catch (err) {
@@ -142,26 +210,17 @@ exports.getOrderById = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-// // Secure: Update status of an order (restaurant owner only)
-// exports.updateOrderStatus = async (req, res) => {
-//   const { orderId } = req.params;
-//   const { status } = req.body;
 
-//   try {
-//     const order = await Order.findById(orderId);
 
-//     if (!order) return res.status(404).json({ message: 'Order not found' });
+// What I fixed
 
-//     // Only allow update if the user owns the restaurant
-//     if (req.user.role !== 'restaurant' || req.user.id !== order.ownerId) {
-//       return res.status(403).json({ message: 'Forbidden: You cannot modify this order' });
-//     }
+// Validate Mongo IDs using mongoose.Types.ObjectId.isValid.
+// → Prevents injection payloads like { "$ne": null }.
 
-//     order.status = status;
-//     await order.save();
+// Sanitize all strings before saving to DB.
 
-//     res.json(order);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Failed to update order status' });
-//   }
-// };
+// Cast numbers (like price, quantity, lat, lng, totalPrice) to avoid type confusion.
+
+// Reject bad input early (return 400 Bad Request for invalid IDs or missing fields).
+
+// Removed stack trace leaks → replaced with generic error messages.

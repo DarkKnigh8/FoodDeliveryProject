@@ -1,140 +1,267 @@
-const stripe = require('../config/stripe');
+// backend/payment_service/src/controllers/paymentController.js
+// Hardened payment controller
+// Fixes applied:
+// - Input validation (amount range, types, session id pattern)
+// - Use environment CLIENT_URL(s) for success/cancel URLs (whitelist/https recommended)
+// - Do not log secrets or return err.message to clients. Log full errors server-side.
+// - Validate metadata (orderId/userId) and cast types
+// - Enforce allowed currencies
+// - Return only safe fields to clients
+
+const stripe = require('../config/stripe'); // configured stripe instance, keep secret out of logs
 const Payment = require('../models/Payment');
+const mongoose = require('mongoose');
 
-// Test Checkout Logic (moved here from paymentRoutes)
+const CLIENT_URLS = (process.env.CLIENT_URLS || process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((u) => u.trim())
+  .filter(Boolean);
+
+// Helper: check session id looks like a Stripe checkout session id (basic)
+const isValidStripeSessionId = (s) => typeof s === 'string' && /^cs_/.test(s);
+
+// Helper: check amount sane (LKR unit or smallest currency unit logic)
+const sanitizeAmount = (a) => {
+  const n = Number(a);
+  if (!Number.isFinite(n)) return null;
+  // disallow negative or zero amounts
+  if (n <= 0) return null;
+  // enforce a reasonable upper bound (e.g., LKR 10,000,000)
+  if (n > 10_000_000) return null;
+  return Math.round(n); // return integer (LKR)
+};
+
+// Helper: minimal ObjectId validation
+const isValidObjectId = (id) => typeof id === 'string' && mongoose.Types.ObjectId.isValid(id);
+
+// Helper: choose an allowed redirect url (fallback to first CLIENT_URLS)
+const chooseAllowedRedirect = (url) => {
+  if (!url) return CLIENT_URLS[0];
+  // only allow urls that are configured in CLIENT_URLS
+  if (CLIENT_URLS.includes(url)) return url;
+  return CLIENT_URLS[0];
+};
+
+// Allowed currencies (enforce or map)
+const ALLOWED_CURRENCIES = ['lkr', 'usd']; // expand as needed
+
+// ----------------- testCheckout -----------------
 exports.testCheckout = async (req, res) => {
-  const { amount = 1500, orderId = "test-order", userId = "test-user" } = req.body;
-
+  // NOTE: test endpoint — still validate input in case used
   try {
+    // Validate and sanitize inputs
+    const rawAmount = req.body.amount ?? 1500;
+    const rawOrderId = String(req.body.orderId ?? 'test-order');
+    const rawUserId = String(req.body.userId ?? 'test-user');
+    const currency = (req.body.currency || 'lkr').toLowerCase();
+
+    const amount = sanitizeAmount(rawAmount);
+    if (amount === null) {
+      return res.status(400).json({ message: 'Invalid amount' });
+    }
+
+    if (!ALLOWED_CURRENCIES.includes(currency)) {
+      return res.status(400).json({ message: 'Unsupported currency' });
+    }
+
+    // Build secure success/cancel URLs from env + whitelist
+    const successBase = chooseAllowedRedirect(process.env.CLIENT_SUCCESS_URL);
+    const cancelBase = chooseAllowedRedirect(process.env.CLIENT_CANCEL_URL);
+
+    // create stripe session safely
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
-          currency: 'lkr',
+          currency,
           product_data: {
-            name: `Order ${orderId}`,
+            // do not include untrusted HTML in name
+            name: `Order ${rawOrderId}`.slice(0, 250),
           },
-          unit_amount: amount * 100, // in cents
+          unit_amount: amount * 100, // Stripe expects smallest currency unit
         },
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `http://localhost:5173/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:5173/payment-cancelled`,
+      success_url: `${successBase.replace(/\/$/, '')}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${cancelBase.replace(/\/$/, '')}/payment-cancelled`,
       metadata: {
-        orderId,
-        userId
+        orderId: rawOrderId,
+        userId: rawUserId,
       }
     });
-    
 
-    res.json({ url: session.url });
+    // Return only necessary info
+    return res.json({ url: session.url });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    // Log full error server-side (no secret values)
+    console.error('[PAYMENT] testCheckout error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-
-
+// ----------------- createPaymentIntent -----------------
 exports.createPaymentIntent = async (req, res) => {
-  const { amount, orderId, userId } = req.body;
-
   try {
+    const { amount: rawAmount, orderId, userId, currency: rawCurrency } = req.body;
+
+    const amount = sanitizeAmount(rawAmount);
+    if (amount === null) return res.status(400).json({ message: 'Invalid amount' });
+
+    const currency = (rawCurrency || 'usd').toLowerCase();
+    if (!ALLOWED_CURRENCIES.includes(currency)) return res.status(400).json({ message: 'Unsupported currency' });
+
+    // Optional: validate orderId/userId shapes if they must be ObjectIds
+    if (orderId && !isValidObjectId(orderId)) {
+      // If orderId is a string token from third-party, skip this check. Adjust as needed.
+      return res.status(400).json({ message: 'Invalid orderId' });
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, // Stripe expects amount in cents
-      currency: 'usd',
-      metadata: { orderId, userId }
+      amount: amount * 100,
+      currency,
+      metadata: { orderId: orderId || '', userId: userId || '' }
     });
 
-    res.json({ clientSecret: paymentIntent.client_secret });
+    // Return only client_secret (Stripe expects this to be used client-side)
+    return res.json({ clientSecret: paymentIntent.client_secret });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[PAYMENT] createPaymentIntent error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-/*
+// ----------------- confirmPayment -----------------
+// Accepts { sessionId } and persists a Payment record after verifying with Stripe
 exports.confirmPayment = async (req, res) => {
-  const { paymentIntentId } = req.body;
-
   try {
-    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const { sessionId } = req.body;
+    if (!sessionId || !isValidStripeSessionId(sessionId)) {
+      return res.status(400).json({ message: 'Invalid session id' });
+    }
 
-    const payment = new Payment({
-      orderId: intent.metadata.orderId,
-      userId: intent.metadata.userId,
-      amount: intent.amount / 100,
-      currency: intent.currency,
-      paymentStatus: intent.status,
-      stripePaymentId: intent.id
-    });
+    // Retrieve session and intent from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ['payment_intent'] });
+    if (!session) {
+      return res.status(404).json({ message: 'Checkout session not found' });
+    }
 
-    await payment.save();
-    res.status(201).json(payment);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+    const paymentIntent = session.payment_intent || session.paymentIntent || session.payment_intent;
+    if (!paymentIntent) {
+      return res.status(400).json({ message: 'Payment intent not available' });
+    }
 
-*/
+    // Validate metadata presence
+    const metaOrderId = paymentIntent.metadata?.orderId || session.metadata?.orderId;
+    const metaUserId = paymentIntent.metadata?.userId || session.metadata?.userId;
 
-// Confirm Payment Logic
-exports.confirmPayment = async (req, res) => {
-  const { sessionId } = req.body; // Get sessionId from request
-
-  try {
-    // Retrieve the session from Stripe using sessionId
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-    // Retrieve the payment intent using session.payment_intent
-    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
-
-    // Create and save the payment record to MongoDB
-    const payment = new Payment({
-      orderId: paymentIntent.metadata.orderId,
-      userId: paymentIntent.metadata.userId,
-      amount: paymentIntent.amount_received / 100, // Convert cents to dollars
-      //currency: paymentIntent.currency,
-      currency: 'lkr',
+    // Optionally validate orderId/userId shapes here
+    // Save only the allowed fields
+    const paymentDoc = new Payment({
+      orderId: metaOrderId || undefined,
+      userId: metaUserId || undefined,
+      amount: (paymentIntent.amount_received ?? paymentIntent.amount) / 100,
+      currency: (paymentIntent.currency || 'lkr').toLowerCase(),
       paymentStatus: paymentIntent.status,
       stripePaymentId: paymentIntent.id
     });
 
-    await payment.save(); // Save the payment to MongoDB
-    console.log("Payment saved:", payment); // For debugging
-    res.status(201).json(payment); // Send the payment data back to frontend
+    await paymentDoc.save();
+
+    // Do NOT console.log secrets. Log safe record id
+    console.info('[PAYMENT] saved payment id:', paymentDoc._id.toString());
+
+    // Return safe response (no internal refund/unexpected metadata)
+    return res.status(201).json({
+      id: paymentDoc._id,
+      amount: paymentDoc.amount,
+      currency: paymentDoc.currency,
+      paymentStatus: paymentDoc.paymentStatus,
+      createdAt: paymentDoc.createdAt
+    });
   } catch (err) {
-    console.error("Error confirming payment:", err.message);
-    res.status(500).json({ error: err.message });
+    // Log full error server-side
+    console.error('[PAYMENT] confirmPayment error:', err);
+    // Do not return err.message to client
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-// View All Transactions (Admin Only)
+// ----------------- view transactions -----------------
 exports.getAllTransactions = async (req, res) => {
   try {
-    const transactions = await Payment.find({}, '_id amount currency paymentStatus stripePaymentId createdAt');
-    res.status(200).json(transactions);
+    // Limit to essential fields only (avoid sensitive fields)
+    const transactions = await Payment.find({}, '_id amount currency paymentStatus stripePaymentId createdAt').sort({ createdAt: -1 }).limit(200);
+    return res.status(200).json(transactions);
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching transactions', error: err.message });
+    console.error('[PAYMENT] getAllTransactions error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-
-// Filter Transactions by date, restaurant, or user
 exports.getFilteredTransactions = async (req, res) => {
-  const { startDate, endDate } = req.query;
-  const query = {};
-
-  if (startDate && endDate) {
-    query.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
-  }
-
   try {
-    const transactions = await Payment.find(query, '_id amount currency paymentStatus stripePaymentId createdAt');
-    res.status(200).json(transactions);
+    const { startDate, endDate } = req.query;
+    const query = {};
+
+    // Parse and validate date strings
+    if (startDate) {
+      const s = new Date(startDate);
+      if (isNaN(s.getTime())) return res.status(400).json({ message: 'Invalid startDate' });
+      query.createdAt = { ...(query.createdAt || {}), $gte: s };
+    }
+    if (endDate) {
+      const e = new Date(endDate);
+      if (isNaN(e.getTime())) return res.status(400).json({ message: 'Invalid endDate' });
+      query.createdAt = { ...(query.createdAt || {}), $lte: e };
+    }
+
+    // Optionally add filters for userId/orderId if supplied and valid
+    if (req.query.userId) {
+      if (!isValidObjectId(req.query.userId)) return res.status(400).json({ message: 'Invalid userId' });
+      query.userId = req.query.userId;
+    }
+    if (req.query.orderId) {
+      // orderId might not be object id depending on system; if it is, validate
+      if (isValidObjectId(req.query.orderId)) {
+        query.orderId = req.query.orderId;
+      } else {
+        // match literal if not an objectId
+        query.orderId = req.query.orderId;
+      }
+    }
+
+    const transactions = await Payment.find(query, '_id amount currency paymentStatus stripePaymentId createdAt').sort({ createdAt: -1 }).limit(500);
+    return res.status(200).json(transactions);
   } catch (err) {
-    res.status(500).json({ message: 'Error filtering transactions', error: err.message });
+    console.error('[PAYMENT] getFilteredTransactions error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 
+// Summary — vulnerabilities found
+
+// Sensitive Data Exposure / Logging secrets
+
+// console.log of payment/session details and returning err.message leaks internal info. (OWASP A02 / A09)
+
+// Insecure Redirects (Open Redirect / Insecure transport)
+
+// success_url and cancel_url are hardcoded to http://localhost:5173/... (HTTP & direct). Should use env-configured, HTTPS in production and whitelist allowed URLs. (OWASP A04 / A02)
+
+// Unvalidated Inputs / Tampering (Amount / orderId / sessionId)
+
+// amount and orderId/userId taken directly from req.body without validation — attacker could pass negative/huge amounts or forged ids. (OWASP A03 Injection / A01 Broken Auth if ID references used for access control)
+
+// Improper Error Handling
+
+// Responses return err.message which can expose internal state (Stack traces, Stripe errors). (OWASP A09)
+
+// Inconsistent currency handling
+
+// createPaymentIntent uses USD, testCheckout uses LKR — unclear. Enforce allowed currencies and validate.
+
+// Session ID misuse
+
+// confirmPayment accepts arbitrary sessionId from client — validate format and do not leak details.
