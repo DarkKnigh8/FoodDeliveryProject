@@ -53,30 +53,7 @@ exports.createPaymentIntent = async (req, res) => {
   }
 };
 
-/*
-exports.confirmPayment = async (req, res) => {
-  const { paymentIntentId } = req.body;
 
-  try {
-    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    const payment = new Payment({
-      orderId: intent.metadata.orderId,
-      userId: intent.metadata.userId,
-      amount: intent.amount / 100,
-      currency: intent.currency,
-      paymentStatus: intent.status,
-      stripePaymentId: intent.id
-    });
-
-    await payment.save();
-    res.status(201).json(payment);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-*/
 
 // Confirm Payment Logic
 exports.confirmPayment = async (req, res) => {

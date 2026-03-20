@@ -142,26 +142,3 @@ exports.getOrderById = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-// // Secure: Update status of an order (restaurant owner only)
-// exports.updateOrderStatus = async (req, res) => {
-//   const { orderId } = req.params;
-//   const { status } = req.body;
-
-//   try {
-//     const order = await Order.findById(orderId);
-
-//     if (!order) return res.status(404).json({ message: 'Order not found' });
-
-//     // Only allow update if the user owns the restaurant
-//     if (req.user.role !== 'restaurant' || req.user.id !== order.ownerId) {
-//       return res.status(403).json({ message: 'Forbidden: You cannot modify this order' });
-//     }
-
-//     order.status = status;
-//     await order.save();
-
-//     res.json(order);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Failed to update order status' });
-//   }
-// };

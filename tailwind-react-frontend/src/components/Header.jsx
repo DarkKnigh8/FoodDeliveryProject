@@ -45,9 +45,14 @@ const Header = () => {
       <header className="bg-gradient-to-r from-gray-800 to-black py-6 w-full fixed top-0 left-0 z-50">
         <div className="container mx-auto flex justify-between items-center px-6 md:px-12">
           {/* Logo */}
-          <div className="text-[#FFFFFF] font-bold text-xl">
-            LOGO
-          </div>
+        <div className="flex flex-col items-center text-[#FFFFFF] font-bold text-xl">
+      <img src="/images/logo.png" alt="Logo" className="h-24 w-auto max-w-none" />
+  
+</div>
+
+
+
+
 
           {/* Navbar (Links) */}
           <nav className="hidden md:flex space-x-6 text-[#FFFFFF] text-lg">
